@@ -15,6 +15,7 @@ Resources:
   DeployBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
+      BucketName: ablackcloudapp.com
       WebsiteConfiguration:
         IndexDocument: index.html
   Distribution:
@@ -36,7 +37,7 @@ Resources:
           MaxTTL: 31536000 # 1 year
           ForwardedValues:
             QueryString: true
-          TargetQriginId: !Ref DeployBucket
+          TargetOriginId: !Ref DeployBucket
           ViewerProtocolPolicy: "redirect-to-https"  # we want to force HTTPS
   CodeBuild:
     Type: 'AWS::CodeBuild::Project'
@@ -51,10 +52,10 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         # Linux container with node installed
-        ComputeType: BUILD_GENERAL_SMALL
+        ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
         Image: "aws/codebuild/nodejs:8.11.0"
-      source:
+      Source:
         Type: CODEPIPELINE
         BuildSpec: !Sub |
           version: 0.1
