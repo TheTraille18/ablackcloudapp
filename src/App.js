@@ -8,7 +8,7 @@ function App() {
       <img src={require('./black-cloud.jpg')} width="1000" height="500"/>
       <header className="App-header">
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          <h2>Welcome</h2>
           <Menu />
         </p>
       </header>
