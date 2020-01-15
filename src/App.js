@@ -1,23 +1,16 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState} from 'react';
+import Menu from "./components/Menu"
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
+    <div className="App" style = {{ backgroundImage: 'url(./black-cloud.jpg)'}}>
+      <img src={require('./black-cloud.jpg')} width="1000" height="500"/>
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          <h2>Welcome</h2>
+          <Menu />
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
       </header>
     </div>
   );
