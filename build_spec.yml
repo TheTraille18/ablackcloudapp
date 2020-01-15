@@ -16,8 +16,7 @@ phases:
           # browser caching
           - >
             aws s3 cp --acl public-read
-            --cache-control="max-age=0, no-cache, no-store, must-revalidate"
-            ./build/service-worker.js s3://${DeployBucket}/
+            --cache-control="max-age=0, no-cache, no-store, must-revalidate" ./build/service-worker.js s3://${DeployBucket}/
           # invalidate the CloudFront cache for index.html and service-worker.js
           # to force CloudFront to update its edge locations with the new versions
           - >
