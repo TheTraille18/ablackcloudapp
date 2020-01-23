@@ -4,12 +4,12 @@ import './App.css';
 
 function App() {
   return (
-    <div className="App" style = {{ backgroundImage: 'url(./black-cloud.jpg)'}}>
-      <img src={require('./black-cloud.jpg')} width="1000" height="500"/>
+    <div className="App">
+      
       <header className="App-header">
         <p>
           <h2>Welcome</h2>
-          <Menu />
+          
         </p>
       </header>
     </div>
