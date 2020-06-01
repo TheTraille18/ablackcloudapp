@@ -6,15 +6,18 @@
   height: 40vmin;
 }
 
-.App-header {
+.App-background {
   background-image: url('black-cloud.jpg');
   min-height: 100vh;
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
   color: white;
+}
+
+.App-title {
+  font-size: calc(10px + 2vmin);
+
 }
 
 .App-link {
