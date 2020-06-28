@@ -2,19 +2,18 @@ import React, {useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+import Amplify from "@aws-amplify/core";
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Modal from '@material-ui/core/Modal';
-import TextField from '@material-ui/core/TextField';
+import Login from './components/Login';
 import './App.css';
-
 
 function App() {
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => {
-    console.log("Fasdjiofjaoifjaioj")
     setOpen(true)
   }
 
@@ -45,17 +44,6 @@ function App() {
     },
   }));
   const classes = useStyles();
-  const login = (
-    <div className={classes.paper}>
-      <h2 id="simple-modal-title">Login</h2>
-      <TextField id="standard-basic" label="Username"/>
-      <TextField id="standard-basic" label="Password"/>
-      <div>
-        <Button >Submit</Button>
-      </div>
-      
-    </div>
-  );
   return (
     <div>
       <Modal
@@ -64,7 +52,9 @@ function App() {
           aria-labelledby="simple-modal-title"
           aria-describedby="simple-modal-description"
         >
-          {login}
+          <div className={classes.paper}>
+            <Login />
+          </div>
       </Modal>
     <div className="App">
       <header className="App-background">
