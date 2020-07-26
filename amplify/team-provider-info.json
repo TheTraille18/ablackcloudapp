@@ -1,0 +1,22 @@
+{
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-ablackcloudapp-dev-131923-authRole",
+            "UnauthRoleArn": "arn:aws:iam::398080922284:role/amplify-ablackcloudapp-dev-131923-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::398080922284:role/amplify-ablackcloudapp-dev-131923-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "amplify-ablackcloudapp-dev-131923-deployment",
+            "UnauthRoleName": "amplify-ablackcloudapp-dev-131923-unauthRole",
+            "StackName": "amplify-ablackcloudapp-dev-131923",
+            "StackId": "arn:aws:cloudformation:us-east-1:398080922284:stack/amplify-ablackcloudapp-dev-131923/82c10490-b963-11ea-8d5e-0e3038696552",
+            "AmplifyAppId": "do6xnz6icwk5o"
+        },
+        "categories": {
+            "auth": {
+                "ablackcloudapp4b74753a": {
+                    "hostedUIProviderCreds": "[{\"ProviderName\":\"Google\",\"client_id\":\"885304889337-ltg27nil573pt2srursmbojg7mgoteva.apps.googleusercontent.com\",\"client_secret\":\"erHvvuSdtGmo_ropTc9ZnKnX\"}]"
+                }
+            }
+        }
+    }
+}
