@@ -4,6 +4,11 @@ phases:
     commands:
       - echo Installing source NPM dependencies...
       - npm install
+      pre-build:
+        commands:
+          - cd src
+          - aws s3 cp s3://jet-mysecurebucket/aws-exports.js .
+          - cd ..
       build:
         commands:
           - echo Build started on `date`
