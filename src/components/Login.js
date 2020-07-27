@@ -67,6 +67,7 @@ export default function Login(props){
         Cache.setItem('CurrentUser', loginValues.username)
         Cache.setItem('AUTH_USER_TOKEN_KEY', user.signInUserSession.accessToken.jwtToken)
         console.log("Logining In")
+        CloseLogin()
     }
     const handleSignUpSubmit = event => {
         event.preventDefault();

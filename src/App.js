@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button';
 import TopBar from './components/TopBar'
 import Modal from '@material-ui/core/Modal';
 import Login from './components/Login';
+import { Auth, Cache } from 'aws-amplify';
 import history from './history'
 
 
@@ -19,6 +20,19 @@ function App() {
 
   const handleClose = () => {
     setOpenLogin(!openLogin)
+  }
+
+  const SignOut = async () => {
+    try {
+      await Auth.signOut();
+      console.log("Signing Out")
+      Cache.setItem('CurrentUser', "")
+      Cache.setItem('AUTH_USER_TOKEN_KEY', "")
+      toggleSignOut()
+    } catch (error) {
+        console.log('error signing out: ', error);
+    }
+
   }
 
 
@@ -91,7 +105,7 @@ function App() {
           <h2>Sign Out</h2>
           <div>
             <Button type="submit" onClick={toggleSignOut} color="inherit">No</Button>
-            <Button type="submit" color="inherit">Yes</Button>
+            <Button type="submit" onClick={SignOut} color="inherit">Yes</Button>
           </div>
         </div>
       </Modal>
