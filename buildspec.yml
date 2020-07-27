@@ -1,11 +1,18 @@
-version: 0.1
+version: 0.2
+
+env:
+  shell: shell-tag
+  variables:
+    DeployBucket: "ablackcloudapp.com"
+    Distribution: "E2Y30RJOE2VRP4"
+
 phases:
   pre_build:
     commands:
       - echo Installing source NPM dependencies...
       - npm install
-      - Copying aws-export file
       - cd src
+      - echo Copying over aws-export file
       - aws s3 cp s3://jet-mysecurebucket/aws-exports.js .
       - cd ..
   build:
@@ -25,7 +32,7 @@ phases:
       # invalidate the CloudFront cache for index.html and service-worker.js
       # to force CloudFront to update its edge locations with the new versions
       - aws cloudfront create-invalidation --distribution-id ${Distribution} --paths /index.html /service-worker.js
-  artifacts:
-    files:
-      - '**/*'
-    base-directory: build
+artifacts:
+  files:
+    - '**/*'
+  base-directory: build
