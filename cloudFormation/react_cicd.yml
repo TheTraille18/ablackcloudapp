@@ -122,7 +122,8 @@ Resources:
                 Resource: 
                   - !GetAtt PipelineBucket.Arn
                   - !Join ['', [!GetAtt PipelineBucket.Arn, "/*"]]
-              - 
+                  - "arn:aws:s3:::jet-mysecurebucket"
+                  - "arn:aws:s3:::jet-mysecurebucket/*" 
                 Effect: Allow
                 Action:
                   - "s3:GetObject"
