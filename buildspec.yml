@@ -1,7 +1,6 @@
 version: 0.2
 
 env:
-  shell: shell-tag
   variables:
     DeployBucket: "ablackcloudapp.com"
     Distribution: "E2Y30RJOE2VRP4"
