@@ -7,11 +7,10 @@ import { Link } from 'react-router-dom';
 export default function Home(){
     const images = [
         {
-            url: `/static/images/clipboard.jpg`,
-            title: 'Tasks Manager',
-            width: '40%',
+          url: `/static/images/clipboard.jpg`,
+          title: 'Tasks Manager',
+          width: '20%',
         },
-    
     ]
     const useStyles = makeStyles((theme) => ({
         root: {

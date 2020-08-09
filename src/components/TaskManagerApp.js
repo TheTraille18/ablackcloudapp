@@ -1,65 +1,228 @@
-import React, {useState} from 'react';
-import { makeStyles, withTheme } from '@material-ui/core/styles';
+import React, {useState, useEffect} from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { Cache } from 'aws-amplify';
 import axios from 'axios';
-import App from '../App.css'
-import { createChainedFunction } from '@material-ui/core';
+import { Auth } from 'aws-amplify';
+import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
+import CardMedia from '@material-ui/core/CardMedia';
+import CardContent from '@material-ui/core/CardContent';
+import CardActions from '@material-ui/core/CardActions';
+import AccessAlarmRoundedIcon from '@material-ui/icons/AccessAlarmRounded';
 
 export default function TaskManagerApp(){
-    
+    const [authToken, setAuthToken] = useState()
+    const [tasks, setTasks] = useState()
+    const [numTasks, setNumTasks] = useState()
+    const [currentUser, setCurrentUser] = useState()
+
     //Task details
     const [values, setValues] = useState({
         taskName: "",
         taskDescription: "",
         taskRunTime: "",
+        hour: "0",
+        minute: "0",
+        seconds: "0"
     })
 
-    const handleCreateTask = event => {
-        event.preventDefault();
-        console.log("Creating Task")
+    useEffect(() => {
+        try {
+            async function AuthUser(){
+                const session = await Auth.currentSession()
+                let tempToken = session.getIdToken().getJwtToken()
+                setAuthToken(tempToken)
+                const authenticatedUser = await Auth.currentAuthenticatedUser();
+                let currentUser = authenticatedUser.username
+                const headers = {
+                    'Authorization' : "Bearer " + tempToken,
+                    'Content-Type': 'application/json'
+                }
+                const response = await axios.get('https://k6n8ccthi7.execute-api.us-east-1.amazonaws.com/PROD/getusertasks', {
+                    params: {
+                        user: currentUser
+                    },
+                    headers: headers
+                })
+                setNumTasks(response.data.length)
+                setTasks(response.data)
+                setCurrentUser(currentUser)           
+          }
+          AuthUser()
+        }catch(err){
+          console.log(err)
+        }
+      },[])
+    
+    const getTasks = async () => {
         const headers = {
-            'Access-Control-Allow-Origin' : '*',
-            'Access-Control-Allow-Headers':'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-            'Access-Control-Allow-Credentials' : true,
-            'Auth' : Cache.getItem('AUTH_USER_TOKEN_KEY'),
+            'Authorization' : "Bearer " + authToken,
             'Content-Type': 'application/json'
         }
-        const user = {
-            User: Cache.getItem('CurrentUser'),
-            TaskName: values.taskName,
-            Description: values.taskDescription,
-            TaskRunTime: values.taskRunTime
+        try {
+            const response = await axios.get('https://k6n8ccthi7.execute-api.us-east-1.amazonaws.com/PROD/getusertasks', {
+                params: {
+                    user: currentUser
+                },
+                headers: headers
+            })
+            console.log(response.data)
+            setTasks(response.data)
+        }catch(err){
+            console.log(err)
         }
-        console.log(user)
-        axios.post('https://k6n8ccthi7.execute-api.us-east-1.amazonaws.com/PROD', (user), headers)
-        .then(res => {
-            console.log(res)
+    }
+
+    const handleDeleteTask = async (User, DateCreated) => {
+        console.log("Deleting Task")
+        const headers = {
+            'Authorization' : "Bearer " + authToken,
+            'Content-Type': 'application/json'
+        }
+        const task = {
+            User,
+            DateCreated,
+        }
+        try {
+            const res = await axios.post('https://k6n8ccthi7.execute-api.us-east-1.amazonaws.com/PROD/deletetasks', (task), {headers})
+            await getTasks()
+            let newNumTasks = numTasks - 1
+            setNumTasks(newNumTasks)
+            console.log("Response", res)
             console.log(res.data)
-        })
+        }catch(err){
+            console.log(err)
+        }
+    }
+
+    const handleCreateTask = async event => {
+        event.preventDefault();
+        let MAX_NUM_TASKS = 5   //Max Num a single user can create
+        if (numTasks < MAX_NUM_TASKS){
+            console.log("Creating Task")
+            const headers = {
+                'Authorization' : "Bearer " + authToken,
+                'Content-Type': 'application/json'
+            }
+            var runTimeSeconds = (parseInt(values.hour) * 3600) + (parseInt(values.minute) * 60) + parseInt(values.seconds)
+            const user = {
+                User: currentUser,
+                TaskName: values.taskName,
+                Description: values.taskDescription,
+                TaskRunTime: String(runTimeSeconds)
+            }
+            try {
+                const res = await axios.post('https://k6n8ccthi7.execute-api.us-east-1.amazonaws.com/PROD/createtask', (user), {headers})
+                console.log("Response",res)
+                console.log(res.data)
+                let newNumTasks = numTasks + 1
+                setNumTasks(newNumTasks)
+                await getTasks()
+            }catch(err){
+                console.log(err)
+            }
+        }else {
+            console.log("Max Num of Task Reached")
+            alert("Max Num of Task Reached")
+        }
     }
 
     const handleChange = name => event => {
         const currentValue = event.target.value
         setValues({ ...values, [name]: currentValue});
     }
+
+    const renderTasks = () => {
+        let itemNum = 1;
+        if (tasks !== undefined){
+            return(
+            tasks.map(task => {
+                itemNum++
+                return (
+                    <Grid item key={itemNum}>
+                        <Card className={classes.taskCard}>
+                            <CardHeader className={classes.margin}
+                                avatar={
+                                    <AccessAlarmRoundedIcon
+                                        color="secondary"
+                                    />
+                                }
+                                title={task.TaskName}
+                                subheaderTypographyProps={{color:"primary"}}
+                                subheader={task.Description}
+                            >
+                            </CardHeader>
+                            <CardMedia className={classes.media}
+                                image="static/images/clipboard.jpg"
+                            />
+                            <CardContent>
+                                Task Run Time: {task.TasKRunTime}
+                            </CardContent>
+                            <CardActions>
+                                <Button size="small" onClick={() => handleDeleteTask(task.User, task.DateCreated)} color="primary">
+                                    End Task
+                                </Button>
+                            </CardActions>
+                        </Card> 
+                    </Grid>
+                )
+            })
+            )
+        }
+
+    }
     
     const useStyles = makeStyles((theme) => ({
         root: {
             flexGrow: 1,
+            position: 'absolute',
+            top: 200,
         },
         taskForm: {
-            position: 'absolute',
-            top: 250,
             width: 500,
-            left: 700,
-            backgroundColor: theme.palette.common.white,
+            color: 'white',
+            backgroundColor: theme.palette.common.black
         },
         margin: {
-            margin: theme.spacing(1)
-        }
+            color: 'white'
+        },
+        textForm: {
+            color: 'white',
+            "&::name": {
+                color: "gray"
+            },
+            // normal style
+            "&::before": {
+                color: 'gray',
+                borderColor: "white"
+            },
+            // hover style
+            "&:hover:not(.Mui-disabled):before": {
+                borderColor: "red"
+            },
+            // focus style
+            "&::after": {
+                borderColor: "white"
+            }
+        },
+        textFont: {
+            color: "gray"
+        },
+        taskCard: {
+            width: 300,
+            backgroundColor: theme.palette.common.black,
+            color: 'white'
+        },
+        taskAvatar:{
+            backgroundColor: "red",
+        },
+        media: {
+            height: 0,
+            paddingTop: '56.25%', // 16:9
+        },
+
     }))
     const classes = useStyles();
     return(
@@ -67,16 +230,21 @@ export default function TaskManagerApp(){
             <p className="App-title">
                 Task Manager App
             </p>
-                <form className={classes.taskForm} onSubmit={handleCreateTask}>
-                        <h2>Task Name</h2>
-                        <div className={classes.margin}>
+            <Grid className={classes.root} container direction="column" justify="center" alignItems="center" spacing={5}>
+            <Grid item>
+            <form className={classes.taskForm} onSubmit={handleCreateTask}>
+                    <h2>Create New Task</h2>
+                    <div className={classes.margin}>
+                        <Grid container spacing={3}>
                             <Grid item xs={12}>
-                                <TextField 
+                                <TextField
                                     id="standard-basic" 
                                     required 
                                     value={values.taskName} 
                                     name="taskName" 
-                                    label="Task Name" 
+                                    label="Task Name"
+                                    InputProps={{className: classes.textForm}}
+                                    InputLabelProps={{className: classes.textFont}}
                                     onChange={handleChange('taskName')}/>
                             </Grid>
                             <Grid item xs={12}>
@@ -86,22 +254,59 @@ export default function TaskManagerApp(){
                                     value={values.taskDescription} 
                                     name="taskDescription" 
                                     label="Task Description" 
+                                    InputProps={{className: classes.textForm}}
+                                    InputLabelProps={{className: classes.textFont}}
                                     onChange={handleChange('taskDescription')}/>
                             </Grid>
-                            <Grid item xs={12}>
-                            <TextField 
-                                id="standard-basic" 
-                                required 
-                                value={values.taskRunTime} 
-                                name="taskRunTime" 
-                                label="Task Run Time" 
-                                onChange={handleChange('taskRunTime')}/>
+                            <Grid item xs={12} >
+                                <Grid container direction="row" justify="center" alignItems="center">
+                                <TextField 
+                                    id="standard-basic" 
+                                    required 
+                                    value={values.hour} 
+                                    name="hour" 
+                                    label="hour" 
+                                    style={{width: '20%'}}
+                                    InputProps={{className: classes.textForm}}
+                                    InputLabelProps={{className: classes.textFont}}
+                                    onChange={handleChange('hour')}/>
+                                <TextField 
+                                    id="standard-basic" 
+                                    required 
+                                    value={values.minute} 
+                                    name="minute" 
+                                    label="minute"
+                                    style={{width: '20%'}}
+                                    InputProps={{className: classes.textForm}}
+                                    InputLabelProps={{className: classes.textFont}}
+                                    onChange={handleChange('minute')}/>
+                                <TextField 
+                                    id="standard-basic" 
+                                    required 
+                                    value={values.seconds} 
+                                    name="seconds" 
+                                    label="seconds" 
+                                    style={{width: '20%'}}
+                                    InputProps={{className: classes.textForm}}
+                                    InputLabelProps={{className: classes.textFont}}
+                                    onChange={handleChange('seconds')}/>
+                                </Grid>
+                                
                             </Grid>
-                            <Grid item xs={12} spacing={5}>
-                                <Button type="submit" variant="contained" color="primary" >Create Task</Button>
+                            <Grid item xs={12} margin="10">
+                                <Button type="submit" variant="contained" color="secondary" >Create Task</Button>
                             </Grid>
-                        </div>
-                </form>
+                        </Grid>
+                    </div>
+            </form>
+            </Grid>
+                <Grid item>
+                    <Grid container spacing={5} >
+                        {renderTasks()}
+                    </Grid>
+                    
+                </Grid>
+            </Grid>
         </div>
     )
 

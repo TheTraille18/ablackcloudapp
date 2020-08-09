@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState } from 'react';
 import { Router, Route, Switch } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -34,7 +34,6 @@ function App() {
     }
 
   }
-
 
   const toggleSignOut = () => {
     setSignOutConfirm(!openSignOutConfirm)
@@ -119,17 +118,17 @@ function App() {
         <Login closeLogin={handleClose}/>
       </div>
       </Modal>
-        <div className="App-background">
-          <TopBar openConfirm={toggleSignOut} openLogin={toggleLogin}/>
-          <Router history={history}>
-            <div>
-                <Switch>
-                    <Route path="/" exact component={Welcome}/>
-                    <Route path="/taskmanagerapp" component={TaskManagerApp}/>
-                </Switch>
-            </div>
-          </Router>
-        </div>
+      <div>
+        <TopBar openConfirm={toggleSignOut} openLogin={toggleLogin}/>
+        <Router history={history}>
+          <div>
+              <Switch>
+                  <Route path="/" exact component={Welcome}/>
+                  <Route path="/taskmanagerapp" component={TaskManagerApp}/>
+              </Switch>
+          </div>
+        </Router>
+      </div>
     </div>
     
   );

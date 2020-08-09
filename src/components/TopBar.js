@@ -1,19 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import AppBar from '@material-ui/core/AppBar';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
-import { Cache } from 'aws-amplify';
+import { Auth } from 'aws-amplify';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
-import BlackCloud from '../black-cloud.jpg';
 
 export default function TopBar(props){
     const [open, setOpen] = useState(false);
+    const [user, setUser] = useState("")
+    const [openUserMenu, setOpenUserMenu] = useState(false)
+    const [isLogged, setIsLogged] = useState(false);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    
+    useEffect(() => {
+      try {
+        async function AuthUser(){
+          const authedUser = await Auth.currentAuthenticatedUser();
+          setUser(authedUser.username)
+          console.log(authedUser);
+          setIsLogged(true)
+        }
+        AuthUser()
+      }catch(err){
+        console.log(err)
+      }
+    },[])
 
     const handleLogin = () => {
       props.openLogin()
+    }
+
+    const handleUserMenu = (event) => {
+      setAnchorEl(event.currentTarget);
+      setOpenUserMenu(!openUserMenu )
+    }
+
+    const handleClose = () => {
+      setOpenUserMenu(!openUserMenu)
     }
 
     const handleSignOut = () => {
@@ -22,25 +50,7 @@ export default function TopBar(props){
     const handleOpen = () => {
         setOpen(!open)
       }
-
-    const loginSignOut = () => {
-        var currentUser = Cache.getItem('CurrentUser')
-        if (currentUser){
-          return (
-            <div className={classes.userNameStyle}>
-              <AccountCircleIcon />
-              <Button onClick={handleSignOut} color="inherit">{Cache.getItem('CurrentUser')}</Button>
-            </div>
-          )
-        }else{
-          return (
-            <div>
-              <Button onClick={handleLogin} color="inherit">Login</Button>
-            </div>
-          )
-        }
-    }
-    const useStyles = makeStyles((theme) => ({
+      const useStyles = makeStyles((theme) => ({
         root: {
           flexGrow: 1,
           backgroundColor: 'transparent !important'
@@ -55,6 +65,11 @@ export default function TopBar(props){
           position: 'absolute',
           right: '100px', 
         },
+        userMenuStyle: {
+          position: 'absolute',
+          top: '0px',
+          right: '100', 
+        },
         signOutModal: {
           position: 'absolute',
           width: 200,
@@ -65,8 +80,6 @@ export default function TopBar(props){
           borderColor: 'black',
           boxShadow: theme.shadows[5],
           padding: theme.spacing(2, 4, 3),
-          backgroundImage: `url(${BlackCloud})`,
-          backgroundSize: "cover",
           ' & h2': {
             position: 'relative',
             left: '20%',
@@ -90,14 +103,51 @@ export default function TopBar(props){
         },
       }));
       const classes = useStyles();
+    const loginSignOut = () => {
+        if (user){
+          return (
+            <div className={classes.userNameStyle}>
+              <AccountCircleIcon />
+              <Button onClick={handleUserMenu} color="inherit">{user} </Button>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={openUserMenu}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleSignOut} >Sign Out</MenuItem>
+              </Menu>
+            </div>
+          )
+        }else{
+          return (
+            <div className={classes.userNameStyle}>
+              <Button onClick={handleLogin} color="inherit">Login </Button>
+            </div>
+          )
+        }
+    }
+    
     return (
-    <AppBar classes={{ root: classes.root }}>
-      <Toolbar>
-        <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-          <MenuIcon />
-        </IconButton>
-        {loginSignOut()}
-      </Toolbar>
-    </AppBar>
+      <div>
+        <AppBar classes={{ root: classes.root }}>
+          <Toolbar>
+            <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+              <MenuIcon />
+            </IconButton>
+            {loginSignOut()}
+          </Toolbar>
+        </AppBar>
+      </div>
+ 
     )
 } 
