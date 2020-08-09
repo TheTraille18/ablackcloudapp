@@ -64,9 +64,11 @@ export default function Login(props){
     const handleLoginSubmit =  async event => {
         event.preventDefault();
         const user = await Auth.signIn(loginValues.username, loginValues.password)
+        const authedUser = await Auth.currentAuthenticatedUser();
+        console.log("fdjsioafjaio ",authedUser)
         Cache.setItem('CurrentUser', loginValues.username)
         Cache.setItem('AUTH_USER_TOKEN_KEY', user.signInUserSession.accessToken.jwtToken)
-        console.log("Logining In")
+        console.log("Login")
         CloseLogin()
     }
     const handleSignUpSubmit = event => {
@@ -191,9 +193,6 @@ export default function Login(props){
             <div classes={{ root: classes.root }}>
                 <form id="login-form" onSubmit={handleLoginSubmit}>
                     <h2 id="simple-modal-title">Login</h2>
-                    <div>
-                        <Button color="primary">Sign In with Google</Button>
-                    </div>
                     <TextField 
                         id="standard-basic" 
                         required 
