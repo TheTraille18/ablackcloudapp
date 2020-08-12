@@ -119,8 +119,8 @@ function App() {
       </div>
       </Modal>
       <div>
-        <TopBar openConfirm={toggleSignOut} openLogin={toggleLogin}/>
         <Router history={history}>
+        <TopBar openConfirm={toggleSignOut} openLogin={toggleLogin}/>
           <div>
               <Switch>
                   <Route path="/" exact component={Welcome}/>
