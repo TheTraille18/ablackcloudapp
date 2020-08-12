@@ -9,6 +9,8 @@ import { Auth } from 'aws-amplify';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
+import HomeIcon from '@material-ui/icons/Home';
+import { Link } from 'react-router-dom';
 
 export default function TopBar(props){
     const [open, setOpen] = useState(false);
@@ -144,6 +146,9 @@ export default function TopBar(props){
             <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
               <MenuIcon />
             </IconButton>
+            <Link to="/" className="ui button primary">
+              <HomeIcon ></HomeIcon>Home
+              </Link>
             {loginSignOut()}
           </Toolbar>
         </AppBar>
