@@ -13,10 +13,8 @@ import HomeIcon from '@material-ui/icons/Home';
 import { Link } from 'react-router-dom';
 
 export default function TopBar(props){
-    const [open, setOpen] = useState(false);
     const [user, setUser] = useState("")
     const [openUserMenu, setOpenUserMenu] = useState(false)
-    const [isLogged, setIsLogged] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
     
     useEffect(() => {
@@ -24,8 +22,6 @@ export default function TopBar(props){
         async function AuthUser(){
           const authedUser = await Auth.currentAuthenticatedUser();
           setUser(authedUser.username)
-          console.log(authedUser);
-          setIsLogged(true)
         }
         AuthUser()
       }catch(err){
@@ -49,10 +45,7 @@ export default function TopBar(props){
     const handleSignOut = () => {
       props.openConfirm()
     }
-    const handleOpen = () => {
-        setOpen(!open)
-      }
-      const useStyles = makeStyles((theme) => ({
+    const useStyles = makeStyles((theme) => ({
         root: {
           flexGrow: 1,
           backgroundColor: 'transparent !important'
