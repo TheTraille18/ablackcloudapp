@@ -1,24 +1,26 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import axios from 'axios';
-import { Auth } from 'aws-amplify';
+import { Auth, API, graphqlOperation} from 'aws-amplify';
+import { createTask, deleteTask } from '../graphql/mutations'
+import { onCreateTask, onUpdateTaskStatus, onDeleteTask} from '../graphql/subscriptions'
+import { getUserTasks } from '../graphql/queries'
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import AccessAlarmRoundedIcon from '@material-ui/icons/AccessAlarmRounded';
-import Backdrop from '@material-ui/core/Backdrop';
-
 
 export default function TaskManagerApp(){
-    const [authToken, setAuthToken] = useState()
-    const [tasks, setTasks] = useState()
+    const [tasks, setTasks] = useState([])
+    const taskRef = useRef(tasks)
     const [numTasks, setNumTasks] = useState()
     const [currentUser, setCurrentUser] = useState()
+    const [reRender, setRerender] = useState(false) //Used to rerender after updateTaskStatus
+    const reRenderRef = useRef(reRender)
 
     //Task details
     const [values, setValues] = useState({
@@ -33,45 +35,73 @@ export default function TaskManagerApp(){
     useEffect(() => {
         try {
             async function AuthUser(){
-                const session = await Auth.currentSession()
-                let tempToken = session.getIdToken().getJwtToken()
-                setAuthToken(tempToken)
                 const authenticatedUser = await Auth.currentAuthenticatedUser();
                 let currentUser = authenticatedUser.username
-                const headers = {
-                    'Authorization' : "Bearer " + tempToken,
-                    'Content-Type': 'application/json'
+                const queryInput = {
+                    User: currentUser
                 }
-                const response = await axios.get('https://k6n8ccthi7.execute-api.us-east-1.amazonaws.com/PROD/getusertasks', {
-                    params: {
-                        user: currentUser
-                    },
-                    headers: headers
-                })
-                setNumTasks(response.data.length)
-                setTasks(response.data)
-                setCurrentUser(currentUser)           
-          }
-          AuthUser()
+                getTasks(queryInput)
+                let numOfTasks = tasks === null ? 0 : tasks.length
+                setNumTasks(numOfTasks)
+                setCurrentUser(currentUser)        
+            }
+            AuthUser()
         }catch(err){
-          console.log(err)
+            console.log(err)
+        }
+        const createTaskListener = API.graphql(graphqlOperation(onCreateTask))
+        .subscribe({
+            next: taskData => {
+                const newTask = taskData.value.data.onCreateTask
+                const currentTaskCreated = taskRef.current
+                const appendTask = [...currentTaskCreated, newTask]
+                setTasks(appendTask)
+                taskRef.current = appendTask
+            }
+        })
+        const updateTaskListener = API.graphql(graphqlOperation(onUpdateTaskStatus))
+        .subscribe({
+            next: taskData => {
+                const updatedTask = taskData.value.data.onUpdateTaskStatus
+                console.log("Task Updated", updatedTask)
+                const currentTasks = taskRef.current
+                currentTasks.forEach(task => {
+                    if (task.TaskName === updatedTask.TaskName){
+                        task.TaskStatus = "Inactive"
+                        Rerender()
+                    }
+                })
+            }
+        })
+        const deleteTaskListener = API.graphql(graphqlOperation(onDeleteTask))
+        .subscribe({
+            next: taskData => {
+                console.log("on Delete Task")
+                const deleteTask = taskData.value.data.onDeleteTask
+                const currentTask = taskRef.current
+                const updateTaskAfterDelete = currentTask.filter(task => task.TaskName !== deleteTask.TaskName)
+                setTasks(updateTaskAfterDelete)
+                taskRef.current = updateTaskAfterDelete
+            }
+        })
+        return () => {
+            createTaskListener.unsubscribe()
+            updateTaskListener.unsubscribe()
+            deleteTaskListener.unsubscribe()
         }
       },[])
-    
-    const getTasks = async () => {
-        const headers = {
-            'Authorization' : "Bearer " + authToken,
-            'Content-Type': 'application/json'
-        }
+
+    const Rerender = () => {
+        const render = !reRenderRef.current
+        setRerender(render)
+        reRenderRef.current = render
+    }
+    const getTasks = async (userInput) => {
         try {
-            const response = await axios.get('https://k6n8ccthi7.execute-api.us-east-1.amazonaws.com/PROD/getusertasks', {
-                params: {
-                    user: currentUser
-                },
-                headers: headers
-            })
-            console.log(response.data)
-            setTasks(response.data)
+            const appsyncQuery = await API.graphql(graphqlOperation(getUserTasks, userInput))
+            const TaskItems = appsyncQuery.data.getUserTasks
+            setTasks(TaskItems)
+            taskRef.current = TaskItems
         }catch(err){
             console.log(err)
         }
@@ -79,21 +109,14 @@ export default function TaskManagerApp(){
 
     const handleDeleteTask = async (User, TaskName) => {
         console.log("Deleting Task")
-        const headers = {
-            'Authorization' : "Bearer " + authToken,
-            'Content-Type': 'application/json'
-        }
-        const task = {
+        const deleteTaskInput = {
             User,
             TaskName,
         }
         try {
-            const res = await axios.post('https://k6n8ccthi7.execute-api.us-east-1.amazonaws.com/PROD/deletetasks', (task), {headers})
-            await getTasks()
+            await API.graphql(graphqlOperation(deleteTask, deleteTaskInput))
             let newNumTasks = numTasks - 1
             setNumTasks(newNumTasks)
-            console.log("Response", res)
-            console.log(res.data)
         }catch(err){
             console.log(err)
         }
@@ -101,13 +124,9 @@ export default function TaskManagerApp(){
 
     const handleCreateTask = async event => {
         event.preventDefault();
-        let MAX_NUM_TASKS = 5   //Max Num a single user can create
+        let MAX_NUM_TASKS = 5  //Max Num a single user can create
         if (numTasks < MAX_NUM_TASKS){
             console.log("Creating Task")
-            const headers = {
-                'Authorization' : "Bearer " + authToken,
-                'Content-Type': 'application/json'
-            }
             var runTimeSeconds = (parseInt(values.hour) * 3600) + (parseInt(values.minute) * 60) + parseInt(values.seconds)
             const user = {
                 User: currentUser,
@@ -116,12 +135,11 @@ export default function TaskManagerApp(){
                 TaskRunTime: String(runTimeSeconds)
             }
             try {
-                const res = await axios.post('https://k6n8ccthi7.execute-api.us-east-1.amazonaws.com/PROD/createtask', (user), {headers})
-                console.log("Response",res)
-                console.log(res.data)
+                await API.graphql(graphqlOperation(createTask, user))
+                //setValues({ ...values, "User": ""});
                 let newNumTasks = numTasks + 1
                 setNumTasks(newNumTasks)
-                await getTasks()
+                //await getTasks()
             }catch(err){
                 console.log(err)
             }
@@ -138,12 +156,11 @@ export default function TaskManagerApp(){
 
     const renderTasks = () => {
         let itemNum = 1;
-        if (tasks !== undefined){
+        if (tasks.length > 0){
             return(
             tasks.map(task => {
                 itemNum++
-                console.log("Status", task.taskRunTime)
-                let statusColor = task.Status === "Active" ? 'green' : 'red'
+                let statusColor = task.TaskStatus === "Active" ? 'green' : 'red'
                 return (
                     <Grid item key={itemNum}>
                         <div className="container">
@@ -174,8 +191,6 @@ export default function TaskManagerApp(){
                             </CardActions>
                         </Card> 
                         </div>
-                        
-                        
                     </Grid>
                 )
             })
@@ -190,7 +205,14 @@ export default function TaskManagerApp(){
             position: 'absolute',
             top: 200,
         },
-        taskFormBackGround: {
+        taskContainer: {
+            position: 'absolute',
+            top: 50,
+        },
+        taskFormBackground: {
+            position: 'relative',
+            top: 0,
+            left: -250,
             width: 500,
             height: 320,
             color: 'white',
@@ -200,10 +222,11 @@ export default function TaskManagerApp(){
         },
         taskFormTitle: {
             position: 'relative',
-            top: 15
+            top: 10
         },
         taskForm: {
             width: 500,
+            left: -250,
             color: 'white',
             position: 'absolute',
             top: 0
@@ -264,16 +287,16 @@ export default function TaskManagerApp(){
     return(
         <div>
             <Grid className={classes.root} container direction="column" justify="center" alignItems="center" spacing={5}>
-            <Grid itme>
-            <p className={classes.appTitle}>
-                Task Manager App
-            </p>
-            </Grid>
+                <Grid item>
+                    <p className={classes.appTitle}>
+                        Task Manager App
+                    </p>
+                </Grid>
             <Grid item>
-                <Grid container direction="row" justify="center">
+                <Grid container direction="column" justify="center" alignItems="center">
                     <Grid item>
-                        <div className="container">
-                        <div className={classes.taskFormBackGround} >
+                        <div className={classes.taskContainer}>
+                        <div className={classes.taskFormBackground} >
                         </div>
                             <form className={classes.taskForm} onSubmit={handleCreateTask}>
                             <h2 className={classes.taskFormTitle} >Create New Task</h2>
