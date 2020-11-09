@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { Auth, API, graphqlOperation} from 'aws-amplify';
+import { API, graphqlOperation} from 'aws-amplify';
 import { createTask, deleteTask } from '../graphql/mutations'
 import { onCreateTask, onUpdateTaskStatus, onDeleteTask} from '../graphql/subscriptions'
 import { getUserTasks } from '../graphql/queries'
@@ -14,10 +14,10 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import AccessAlarmRoundedIcon from '@material-ui/icons/AccessAlarmRounded';
 
-export default function TaskManagerApp(){
+export default function TaskManagerApp(props){
     const [tasks, setTasks] = useState([])
     const taskRef = useRef(tasks)
-    const [numTasks, setNumTasks] = useState()
+    const [numTasks, setNumTasks] = useState(0)
     const [currentUser, setCurrentUser] = useState()
     const [reRender, setRerender] = useState(false) //Used to rerender after updateTaskStatus
     const reRenderRef = useRef(reRender)
@@ -34,18 +34,16 @@ export default function TaskManagerApp(){
 
     useEffect(() => {
         try {
-            async function AuthUser(){
-                const authenticatedUser = await Auth.currentAuthenticatedUser();
-                let currentUser = authenticatedUser.username
+            if (props){
                 const queryInput = {
-                    User: currentUser
+                    User: props.user
                 }
                 getTasks(queryInput)
                 let numOfTasks = tasks === null ? 0 : tasks.length
                 setNumTasks(numOfTasks)
-                setCurrentUser(currentUser)        
+                setCurrentUser(currentUser) 
             }
-            AuthUser()
+
         }catch(err){
             console.log(err)
         }
@@ -54,7 +52,13 @@ export default function TaskManagerApp(){
             next: taskData => {
                 const newTask = taskData.value.data.onCreateTask
                 const currentTaskCreated = taskRef.current
-                const appendTask = [...currentTaskCreated, newTask]
+                let appendTask
+                if (currentTaskCreated !== null){
+                    appendTask = [...currentTaskCreated, newTask]
+                }else {
+                    appendTask = [newTask]
+                }
+                
                 setTasks(appendTask)
                 taskRef.current = appendTask
             }
@@ -63,7 +67,6 @@ export default function TaskManagerApp(){
         .subscribe({
             next: taskData => {
                 const updatedTask = taskData.value.data.onUpdateTaskStatus
-                console.log("Task Updated", updatedTask)
                 const currentTasks = taskRef.current
                 currentTasks.forEach(task => {
                     if (task.TaskName === updatedTask.TaskName){
@@ -76,12 +79,15 @@ export default function TaskManagerApp(){
         const deleteTaskListener = API.graphql(graphqlOperation(onDeleteTask))
         .subscribe({
             next: taskData => {
-                console.log("on Delete Task")
                 const deleteTask = taskData.value.data.onDeleteTask
                 const currentTask = taskRef.current
-                const updateTaskAfterDelete = currentTask.filter(task => task.TaskName !== deleteTask.TaskName)
-                setTasks(updateTaskAfterDelete)
-                taskRef.current = updateTaskAfterDelete
+                if (currentTask){
+                    const updateTaskAfterDelete = currentTask.filter(task => task.TaskName !== deleteTask.TaskName)
+                    setTasks(updateTaskAfterDelete)
+                    taskRef.current = updateTaskAfterDelete
+                }else {
+                    setTasks([])
+                }
             }
         })
         return () => {
@@ -90,6 +96,15 @@ export default function TaskManagerApp(){
             deleteTaskListener.unsubscribe()
         }
       },[])
+
+    const ResetFormText = () => {
+        setValues({ ...values, "taskName": "",
+                    "taskDescription": "",
+                    "taskRunTime": "",
+                    "hour": "0",
+                    "minute": "0",
+                    "seconds": "0"});
+}
 
     const Rerender = () => {
         const render = !reRenderRef.current
@@ -108,7 +123,6 @@ export default function TaskManagerApp(){
     }
 
     const handleDeleteTask = async (User, TaskName) => {
-        console.log("Deleting Task")
         const deleteTaskInput = {
             User,
             TaskName,
@@ -125,18 +139,19 @@ export default function TaskManagerApp(){
     const handleCreateTask = async event => {
         event.preventDefault();
         let MAX_NUM_TASKS = 5  //Max Num a single user can create
+        
         if (numTasks < MAX_NUM_TASKS){
-            console.log("Creating Task")
             var runTimeSeconds = (parseInt(values.hour) * 3600) + (parseInt(values.minute) * 60) + parseInt(values.seconds)
+            console.log("Props user",props.user)
             const user = {
-                User: currentUser,
+                User: props.user,
                 TaskName: values.taskName,
                 Description: values.taskDescription,
                 TaskRunTime: String(runTimeSeconds)
             }
             try {
                 await API.graphql(graphqlOperation(createTask, user))
-                //setValues({ ...values, "User": ""});
+                ResetFormText()
                 let newNumTasks = numTasks + 1
                 setNumTasks(newNumTasks)
                 //await getTasks()
@@ -144,7 +159,6 @@ export default function TaskManagerApp(){
                 console.log(err)
             }
         }else {
-            console.log("Max Num of Task Reached")
             alert("Max Num of Task Reached")
         }
     }
@@ -156,6 +170,12 @@ export default function TaskManagerApp(){
 
     const renderTasks = () => {
         let itemNum = 1;
+        if (tasks == null) {
+            return (
+                <div>
+                </div>
+            )
+        }
         if (tasks.length > 0){
             return(
             tasks.map(task => {
@@ -205,6 +225,12 @@ export default function TaskManagerApp(){
             position: 'absolute',
             top: 200,
         },
+        number: {
+            "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
+              "-webkit-appearance": "none",
+              margin: 0
+            }
+        },
         taskContainer: {
             position: 'absolute',
             top: 50,
@@ -217,7 +243,7 @@ export default function TaskManagerApp(){
             height: 320,
             color: 'white',
             backgroundColor: theme.palette.common.white,
-            opacity: 0.05
+            opacity: 0.08
            
         },
         taskFormTitle: {
@@ -261,6 +287,10 @@ export default function TaskManagerApp(){
         textFont: {
             color: "white"
         },
+        createTaskButton: {
+            color: 'white',
+            border: '1px solid',
+        },
         taskCard: {
             position: 'absolute',
             top: 375,
@@ -269,6 +299,8 @@ export default function TaskManagerApp(){
             color: 'white'
         },
         taskBackDrop: {
+            position: "relative",
+            top: 60,
             height: 300,
             width: 300,
             backgroundColor: theme.palette.common.black,
@@ -284,102 +316,114 @@ export default function TaskManagerApp(){
 
     }))
     const classes = useStyles();
+    const taskCreationForm = () => {
+        return (
+            <form className={classes.taskForm} onSubmit={handleCreateTask}>
+                <h2 className={classes.taskFormTitle} >Create New Task</h2>
+                    <div className={classes.margin}>
+                        <Grid container direction="column" spacing={3}>
+                            <Grid item xs={12}>
+                                <TextField
+                                    id="standard-basic" 
+                                    required 
+                                    value={values.taskName} 
+                                    name="taskName" 
+                                    label="Task Name"
+                                    autoComplete="off"
+                                    InputProps={{className: classes.textForm}}
+                                    InputLabelProps={{className: classes.textFont}}
+                                    onChange={handleChange('taskName')}/>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField 
+                                    id="standard-basic" 
+                                    required 
+                                    value={values.taskDescription} 
+                                    name="taskDescription" 
+                                    label="Task Description"
+                                    autoComplete="off" 
+                                    InputProps={{className: classes.textForm}}
+                                    InputLabelProps={{className: classes.textFont}}
+                                    onChange={handleChange('taskDescription')}/>
+                            </Grid>
+                            <Grid item xs={12} >
+                                <Grid container direction="row" justify="center" alignItems="center">
+                                    <TextField 
+                                        className={classes.number}
+                                        id="standard-basic" 
+                                        required 
+                                        value={values.hour} 
+                                        name="hour" 
+                                        label="hour"
+                                        type="number"
+                                        autoComplete='off'
+                                        min={0}
+                                        max={1}
+                                        style={{width: '20%'}}
+                                        InputProps={{className: classes.textForm}}
+                                        InputLabelProps={{className: classes.textFont}}
+                                        onChange={handleChange('hour')}/>
+                                    <TextField 
+                                        className={classes.number}
+                                        id="standard-basic" 
+                                        required 
+                                        value={values.minute} 
+                                        name="minute" 
+                                        label="minute"
+                                        type="number"
+                                        autoComplete='off'
+                                        style={{width: '20%'}}
+                                        InputProps={{className: classes.textForm}}
+                                        InputLabelProps={{className: classes.textFont}}
+                                        onChange={handleChange('minute')}/>
+                                    <TextField
+                                        className={classes.number} 
+                                        id="standard-basic" 
+                                        required 
+                                        value={values.seconds} 
+                                        name="seconds" 
+                                        label="seconds"
+                                        type="number"
+                                        autoComplete='off'
+                                        style={{width: '20%'}}
+                                        InputProps={{className: classes.textForm}}
+                                        InputLabelProps={{className: classes.textFont}}
+                                        onChange={handleChange('seconds')}/>
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12} margin="10">
+                                <Button className={classes.createTaskButton} type="submit" variant="outlined" >Create Task</Button>
+                            </Grid>
+                        </Grid>
+                    </div>
+             </form>
+        )
+    }
     return(
         <div>
-            <Grid className={classes.root} container direction="column" justify="center" alignItems="center" spacing={5}>
+            <Grid className={classes.root} container direction="column" justify="center" alignItems="center">
                 <Grid item>
                     <p className={classes.appTitle}>
                         Task Manager App
                     </p>
                 </Grid>
-            <Grid item>
-                <Grid container direction="column" justify="center" alignItems="center">
-                    <Grid item>
-                        <div className={classes.taskContainer}>
-                        <div className={classes.taskFormBackground} >
-                        </div>
-                            <form className={classes.taskForm} onSubmit={handleCreateTask}>
-                            <h2 className={classes.taskFormTitle} >Create New Task</h2>
-                            <div className={classes.margin}>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            id="standard-basic" 
-                                            required 
-                                            value={values.taskName} 
-                                            name="taskName" 
-                                            label="Task Name"
-                                            InputProps={{className: classes.textForm}}
-                                            InputLabelProps={{className: classes.textFont}}
-                                            onChange={handleChange('taskName')}/>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <TextField 
-                                            id="standard-basic" 
-                                            required 
-                                            value={values.taskDescription} 
-                                            name="taskDescription" 
-                                            label="Task Description" 
-                                            InputProps={{className: classes.textForm}}
-                                            InputLabelProps={{className: classes.textFont}}
-                                            onChange={handleChange('taskDescription')}/>
-                                    </Grid>
-                                    <Grid item xs={12} >
-                                        <Grid container direction="row" justify="center" alignItems="center">
-                                        <TextField 
-                                            id="standard-basic" 
-                                            required 
-                                            value={values.hour} 
-                                            name="hour" 
-                                            label="hour" 
-                                            style={{width: '20%'}}
-                                            InputProps={{className: classes.textForm}}
-                                            InputLabelProps={{className: classes.textFont}}
-                                            onChange={handleChange('hour')}/>
-                                        <TextField 
-                                            id="standard-basic" 
-                                            required 
-                                            value={values.minute} 
-                                            name="minute" 
-                                            label="minute"
-                                            style={{width: '20%'}}
-                                            InputProps={{className: classes.textForm}}
-                                            InputLabelProps={{className: classes.textFont}}
-                                            onChange={handleChange('minute')}/>
-                                        <TextField 
-                                            id="standard-basic" 
-                                            required 
-                                            value={values.seconds} 
-                                            name="seconds" 
-                                            label="seconds" 
-                                            style={{width: '20%'}}
-                                            InputProps={{className: classes.textForm}}
-                                            InputLabelProps={{className: classes.textFont}}
-                                            onChange={handleChange('seconds')}/>
-                                        </Grid>
-                                        
-                                    </Grid>
-                                    <Grid item xs={12} margin="10">
-                                        <Button type="submit" variant="contained" color="primary" >Create Task</Button>
-                                    </Grid>
-                                </Grid>
+                <Grid item>
+                    <Grid container direction="column" justify="center" alignItems="center">
+                        <Grid item>
+                            <div className={classes.taskContainer}>
+                                <div className={classes.taskFormBackground} >
+                                </div>
+                                {taskCreationForm()}
                             </div>
-                    </form>
-                        </div>
-                    
+                        </Grid>
                     </Grid>
-
                 </Grid>
-           
-            </Grid>
-            <Grid item>
-                <Grid container spacing={5} >
-                    {renderTasks()}
+                <Grid item>
+                    <Grid container spacing={5} >
+                        {renderTasks()}
+                    </Grid>
                 </Grid>
-                
-            </Grid>
             </Grid>
         </div>
     )
-
 }

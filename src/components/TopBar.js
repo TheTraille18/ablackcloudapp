@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import AppBar from '@material-ui/core/AppBar';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
-import { Auth } from 'aws-amplify';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -13,25 +12,8 @@ import HomeIcon from '@material-ui/icons/Home';
 import { Link } from 'react-router-dom';
 
 export default function TopBar(props){
-    const [user, setUser] = useState("")
     const [openUserMenu, setOpenUserMenu] = useState(false)
     const [anchorEl, setAnchorEl] = React.useState(null);
-    
-    useEffect(() => {
-      try {
-        async function AuthUser(){
-          const authedUser = await Auth.currentAuthenticatedUser();
-          setUser(authedUser.username)
-        }
-        AuthUser()
-      }catch(err){
-        console.log(err)
-      }
-    },[])
-
-    const handleLogin = () => {
-      props.openLogin()
-    }
 
     const handleUserMenu = (event) => {
       setAnchorEl(event.currentTarget);
@@ -42,8 +24,15 @@ export default function TopBar(props){
       setOpenUserMenu(!openUserMenu)
     }
 
+    const toProfile = () => {
+      setAnchorEl(false)
+      setOpenUserMenu(false)
+    }
+
     const handleSignOut = () => {
       props.openConfirm()
+      setAnchorEl(false)
+      setOpenUserMenu(false)
     }
     const useStyles = makeStyles((theme) => ({
         root: {
@@ -58,7 +47,7 @@ export default function TopBar(props){
         },
         userNameStyle: {
           position: 'absolute',
-          right: '100px', 
+          right: '100px',
         },
         userMenuStyle: {
           position: 'absolute',
@@ -98,12 +87,13 @@ export default function TopBar(props){
         },
       }));
       const classes = useStyles();
+      var currentUser = localStorage.getItem("user")
     const loginSignOut = () => {
-        if (user){
+        if (currentUser){
           return (
             <div className={classes.userNameStyle}>
               <AccountCircleIcon />
-              <Button onClick={handleUserMenu} color="inherit">{user} </Button>
+              <Button onClick={handleUserMenu} color="inherit">{currentUser}</Button>
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}
@@ -119,19 +109,20 @@ export default function TopBar(props){
                 open={openUserMenu}
                 onClose={handleClose}
               >
+                <Link to="/profile" onClick={toProfile} className="ui button primary">
+                  <MenuItem >Profile</MenuItem>
+                </Link>
                 <MenuItem onClick={handleSignOut} >Sign Out</MenuItem>
               </Menu>
             </div>
           )
         }else{
           return (
-            <div className={classes.userNameStyle}>
-              <Button onClick={handleLogin} color="inherit">Login </Button>
+            <div>
             </div>
           )
         }
     }
-    
     return (
       <div>
         <AppBar classes={{ root: classes.root }}>
