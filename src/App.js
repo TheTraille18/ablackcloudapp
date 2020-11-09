@@ -1,42 +1,88 @@
-import React, {useState } from 'react';
-import { Router, Route, Switch } from 'react-router-dom';
+import React, {useState, useEffect } from 'react';
+import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import TopBar from './components/TopBar'
-import Modal from '@material-ui/core/Modal';
-import Login from './components/Login';
 import { Auth, Cache } from 'aws-amplify';
 import history from './history'
+import { confirmAlert } from 'react-confirm-alert'; // Import
 
 
-import Welcome from './components/Home';
+import Welcome from './components/Welcome';
+import Home from './components/Home';
 import TaskManagerApp from './components/TaskManagerApp'
+import Profile from './components/Profile'
 
 import './App.css';
 
 function App() {
   const [openLogin, setOpenLogin] = useState(false);
-  const [openSignOutConfirm, setSignOutConfirm] = useState(false)
+  const [logged, setLogged] = useState(false)
+  const [render, setRender] = useState(false)
+  const [user, setUser] = useState()
 
-  const handleClose = () => {
-    setOpenLogin(!openLogin)
+  useEffect(() => {
+    try {
+      AuthUser()
+    }catch(err){
+      console.log(err)
+    }
+  },[])
+
+  async function AuthUser(){
+    await Auth.currentAuthenticatedUser()
+    .then((user) => {
+      if (user !== undefined){
+        setUser(user.username)
+        setLogged(true)
+        Cache.setItem("isLogged",true)
+        localStorage.setItem("user",user.username)
+        localStorage.setItem("isLogged",true)
+      }
+    })
+    .catch((err) => {
+      Cache.setItem("isLogged",false)
+      console.log(err)
+    })
+  }
+
+  const UserLogin = () => {
+    AuthUser()
+    setLogged(true)
+    Cache.setItem("isLogged",true)
+    localStorage.setItem("isLogged",true)
+    renderLoginTopBar()
+  }
+
+  const ProtectedRoute = ({component: Comp, logged, path, user }) => {
+    var isLogged = localStorage.getItem("isLogged") === "true" 
+    var currentUser = localStorage.getItem("user")
+    return (
+      <Route path={path} 
+        render={ props => {
+          return isLogged ? <Comp logged={isLogged} user={currentUser} {...props}/> : <Redirect to="/" />
+
+      }}/>
+    )
   }
 
   const SignOut = async () => {
     try {
       await Auth.signOut();
-      console.log("Signing Out")
+      Cache.setItem("isLogged",false)
       Cache.setItem('CurrentUser', "")
       Cache.setItem('AUTH_USER_TOKEN_KEY', "")
-      toggleSignOut()
+      localStorage.setItem("user","")
+      localStorage.setItem("isLogged",false)
+      setLogged(false)
+      setUser()
     } catch (error) {
         console.log('error signing out: ', error);
     }
-
   }
 
-  const toggleSignOut = () => {
-    setSignOutConfirm(!openSignOutConfirm)
+  const renderLoginTopBar = () => {
+    setRender(!render)
   }
 
   const toggleLogin = () => {
@@ -48,83 +94,60 @@ function App() {
       flexGrow: 1,
       backgroundColor: 'transparent !important'
     },
-    menuButton: {
-      marginRight: theme.spacing(2),
-    },
-    title: {
-      flexGrow: 1,
+    loginError: {
+      textAlign: 'center',
+      ' & p': {
+        position: 'relative',
+        top: -10,
+      },
+      ' & Button': {
+        color: 'white',
+        width: 100,
+        backgroundColor: 'rgba(45, 8, 177, 0.9)',
+        borderColor: 'white'
+      }
     },
     userNameStyle: {
       position: 'absolute',
       right: '100px', 
-    },
-    signOutModal: {
-      position: 'absolute',
-      backgroundColor: 'black',
-      width: 200,
-      color: 'white',
-      right: '45%', 
-      top: '30%',
-      border: '2px solid #050',
-      borderColor: 'black',
-      boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
-      backgroundSize: "cover",
-      ' & h2': {
-        position: 'relative',
-        left: '25%',
-        width: 100,
-      },
-      ' & div': {
-        position: 'relative',
-        left: '15%',
-        width: 180,
-      }
-    },
-    login: {
-      position: 'absolute',
-      width: 400,
-      right: '40%', 
-      top: '30%',
-      backgroundColor: theme.palette.background.paper,
-      border: '2px solid black',
-      boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
-    },
+    }
   }));
   const classes = useStyles();
+  const toggleSignOut = () => {
+    confirmSignOut() 
+  }
+  const confirmSignOut = () => {
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (
+          <div className={classes.loginError}>
+              <h1>Are you sure?</h1>
+              <p>You want to sign out?</p>
+              <Button variant="outlined" color="primary" onClick={() => {
+                SignOut()
+                onClose()
+              }}>
+                Yes
+              </Button>
+              <Button variant="outlined" color="primary" onClick={onClose} >
+                  No
+              </Button>
+          </div>
+        );
+      }
+    });
+  }
   return (
     <div className="App">
-      <Modal
-          open={openSignOutConfirm}
-          aria-labelledby="simple-modal-title"
-          aria-describedby="simple-modal-description"
-        >
-        <div className={classes.signOutModal}>
-          <h2>Sign Out</h2>
-          <div>
-            <Button type="submit" onClick={toggleSignOut} color="inherit">No</Button>
-            <Button type="submit" onClick={SignOut} color="inherit">Yes</Button>
-          </div>
-        </div>
-      </Modal>
-      <Modal
-          open={openLogin}
-          onClose={handleClose}
-          aria-labelledby="simple-modal-title"
-          aria-describedby="simple-modal-description"
-        >
-      <div className={classes.login}>
-        <Login closeLogin={handleClose}/>
-      </div>
-      </Modal>
       <div>
-        <Router history={history}>
-        <TopBar openConfirm={toggleSignOut} openLogin={toggleLogin}/>
+        <Router history={history}>          
+        <TopBar openConfirm={toggleSignOut} openLogin={toggleLogin} renderLogin={renderLoginTopBar} user={user}/>
           <div>
               <Switch>
-                  <Route path="/" exact component={Welcome}/>
-                  <Route path="/taskmanagerapp" component={TaskManagerApp}/>
+                  <Route path="/" exact render={(props) => (<Welcome {...props} logged={logged} UserLogin={UserLogin}/>)}/>
+                  <ProtectedRoute path="/apps" logged={logged} component={Home}/>
+                  <ProtectedRoute path="/taskmanagerapp" user={localStorage.getItem("user")} logged={logged} component={TaskManagerApp}/>
+                  <ProtectedRoute path="/profile" logged={logged} component={Profile}/>
               </Switch>
           </div>
         </Router>
