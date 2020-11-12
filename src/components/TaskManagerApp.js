@@ -113,8 +113,10 @@ export default function TaskManagerApp(props){
     }
     const getTasks = async (userInput) => {
         try {
+            console.log("Getting Tasks")
             const appsyncQuery = await API.graphql(graphqlOperation(getUserTasks, userInput))
-            const TaskItems = appsyncQuery.data.getUserTasks
+            var TaskItems = appsyncQuery.data.getUserTasks
+            TaskItems = TaskItems === null ? 0 : TaskItems
             setTasks(TaskItems)
             taskRef.current = TaskItems
         }catch(err){
@@ -139,10 +141,8 @@ export default function TaskManagerApp(props){
     const handleCreateTask = async event => {
         event.preventDefault();
         let MAX_NUM_TASKS = 5  //Max Num a single user can create
-        
-        if (numTasks < MAX_NUM_TASKS){
+        if (tasks.length < MAX_NUM_TASKS){
             var runTimeSeconds = (parseInt(values.hour) * 3600) + (parseInt(values.minute) * 60) + parseInt(values.seconds)
-            console.log("Props user",props.user)
             const user = {
                 User: props.user,
                 TaskName: values.taskName,
@@ -152,8 +152,8 @@ export default function TaskManagerApp(props){
             try {
                 await API.graphql(graphqlOperation(createTask, user))
                 ResetFormText()
-                let newNumTasks = numTasks + 1
-                setNumTasks(newNumTasks)
+                //let newNumTasks = numTasks + 1
+                //setNumTasks(newNumTasks)
                 //await getTasks()
             }catch(err){
                 console.log(err)
