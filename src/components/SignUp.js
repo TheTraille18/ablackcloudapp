@@ -8,8 +8,7 @@ import { confirmAlert } from 'react-confirm-alert';
 import '../App.css';
 
 export default function SignUp(props){
-    const [code, setCode] = useState("")
-    const [enterCode, setEnterCode] = useState(false)
+    const [verifyLink, setVerifyLink] = useState(false) 
 
     //Validations
     const [doesPasswordsMatch, setPasswordMatch] = useState(true)
@@ -91,12 +90,15 @@ export default function SignUp(props){
             color: 'white',
             backgroundColor: 'white'
         },
+        loginText: {
+            color: 'blue'
+        },
         signUpFormBackground: {
             position: 'relative',
-            top: 200,
+            top: 220,
             left: 750,
             width: 500,
-            height: 200,
+            height: 220,
             color: 'white',
             backgroundColor: theme.palette.common.white,
             opacity: 0.08
@@ -109,6 +111,10 @@ export default function SignUp(props){
         signUpButton: {
             position: 'relative',
             left: "-20%"
+        },
+        verifyButton: {
+            position: 'relative',
+            top: 30
         }
     }));
     const classes = useStyles();
@@ -123,7 +129,7 @@ export default function SignUp(props){
                 }
             })
             .then(() => {
-                setEnterCode(true)
+                setVerifyLink(true)
                 //confirmationCode()
             })
             .catch(error => {
@@ -158,9 +164,6 @@ export default function SignUp(props){
         else if (name === "password"){
             passwordValidator(currentValue)
         }
-        else if (name === "code"){
-            setCode(currentValue)
-        }
     }
 
     const emailValidator = () => {
@@ -184,36 +187,19 @@ export default function SignUp(props){
         }
     }
 
-    const confirmationCode = () => {
+    const sentVerifyLink = () => {
         confirmAlert({
             customUI: ({ onClose }) => {
                 return (
                     <Grid container direction="column" className={classes.confirmCode}>
                     <Grid item>
-                        <h1>Enter code</h1>
+                        <h1>Check Email to Verify</h1>
                     </Grid>
                     <Grid item>
-                        <TextField className={classes.code}
-                            id="standard-basic" 
-                            required 
-                            value={code}
-                            name="code" 
-                            label="code"
-                            autoComplete='off'
-                            InputProps={{className: classes.codeTextForm}}
-                            InputLabelProps={{className: classes.codeTextFont}}
-                            onChange={handleChange('code')}/>
-                    </Grid>
-                    <Grid item>
-                        <Button variant="outlined" color="primary" onClick={() => {
-                            confirmSignUp(values.username, code)
-                            .then((confirm) => {
-                                if (confirm != null){
-                                    onClose()
-                                }
-                            })
+                        <Button className={classes.verifyButton} variant="outlined" color="primary" onClick={() => {
+                            onClose()
                         }}>
-                        Enter
+                        OK
                         </Button>
                     </Grid>
                 </Grid>
@@ -231,15 +217,6 @@ export default function SignUp(props){
             //setConfirm(true)
         }
     }
-    const confirmSignUp = async (username, code) => {
-        try {
-            await Auth.confirmSignUp(username, code)
-            return 0
-        } catch (error) {
-            alert(error.message)
-            return null
-        }
-    }
 
     const handleLogin = () => {
         props.toggleSignUp()
@@ -255,11 +232,9 @@ export default function SignUp(props){
 
     return (
         <div>
+            {verifyLink ? sentVerifyLink() : <div></div>}
             <div className={classes.signUpFormBackground}>
-
             </div>
-            {enterCode ? confirmationCode() : <div></div>}
-       
         <div className={classes.signUpForm}>
         <h2 id="simple-modal-title">Sign Up</h2>
         <form id="signup-form">
@@ -332,7 +307,10 @@ export default function SignUp(props){
                 <Grid item>
                     <div className={classes.signUpButton}>
                         <Button className={classes.textForm} type="submit" onClick={event => handleSignUpSubmit(event)}>Submit</Button>
-                        <Button className={classes.textForm} onClick={handleLogin }>Login</Button>
+                        <div>
+                            Already have an account?
+                                <Button className={classes.loginText} onClick={handleLogin }>Login</Button>
+                            </div>
                     </div>
                 </Grid>
             </Grid>
