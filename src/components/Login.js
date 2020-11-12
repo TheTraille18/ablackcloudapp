@@ -86,7 +86,7 @@ const Login = (props) => {
         },
         formButton: {
             position: 'relative',
-            top: 50
+            top: 40
         },
         loginFormBackground: {
             position: 'relative',
@@ -139,6 +139,9 @@ const Login = (props) => {
         forgotPasswordTextFont: {
             color: 'white',
             backgroundColor: 'white'
+        },
+        signUpText: {
+            color: 'blue'
         },
         forgotPasswordModal: {
             textAlign: 'center',
@@ -239,7 +242,10 @@ const Login = (props) => {
                         </Grid>
                         <div className={classes.formButton}>
                             <Button className={classes.loginButton} type="submit" onClick={handleLoginSubmit} >Login</Button>
-                            <Button className={classes.loginButton} onClick={(event) => handleSignUp(event)}>Sign Up</Button>
+                            <div>
+                                Need an account?
+                                <Button className={classes.signUpText} onClick={(event) => handleSignUp(event)}>Sign Up</Button>
+                            </div>
                         </div>
                 </form>
                 </div>
