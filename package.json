@@ -10,7 +10,7 @@
     "aws-amplify": "^3.0.13",
     "aws-appsync": "^4.0.0",
     "aws-appsync-react": "^4.0.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "graphql-tag": "^2.11.0",
     "nodemon": "^2.0.1",
     "react": "^16.12.0",
