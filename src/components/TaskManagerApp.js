@@ -15,10 +15,10 @@ import CardActions from '@material-ui/core/CardActions';
 import AccessAlarmRoundedIcon from '@material-ui/icons/AccessAlarmRounded';
 
 export default function TaskManagerApp(props) {
+    const { user } = props;
     const [tasks, setTasks] = useState([])
     const taskRef = useRef(tasks)
     const [numTasks, setNumTasks] = useState(0)
-    const [currentUser, setCurrentUser] = useState()
     const [reRender, setRerender] = useState(false) //Used to rerender after updateTaskStatus
     const reRenderRef = useRef(reRender)
 
@@ -33,17 +33,12 @@ export default function TaskManagerApp(props) {
     })
 
     useEffect(() => {
-        try {
-            if (props) {
-                const queryInput = {
-                    User: props.user
-                }
-                getTasks(queryInput)
-                let numOfTasks = tasks === null ? 0 : tasks.length
-                setNumTasks(numOfTasks)
-                setCurrentUser(currentUser)
-            }
+        if (!user) {
+            return undefined;
+        }
 
+        try {
+            getTasks({ User: user })
         } catch (err) {
             console.log(err)
         }
@@ -95,7 +90,7 @@ export default function TaskManagerApp(props) {
             updateTaskListener.unsubscribe()
             deleteTaskListener.unsubscribe()
         }
-    }, [])
+    }, [user])
 
     const ResetFormText = () => {
         setValues({
