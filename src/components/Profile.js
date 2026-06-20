@@ -76,10 +76,11 @@ export default function Profile(){
                 console.log(authenticatedUser)
                 let currentUser = authenticatedUser.username
                 let email = authenticatedUser.attributes.email
-                setValues({...values, 
-                    "user": currentUser,
-                    "email": email
-                })
+                setValues(prev => ({
+                    ...prev,
+                    user: currentUser,
+                    email: email
+                }))
             }
         AuthUser()
         }catch(err){
