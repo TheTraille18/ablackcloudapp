@@ -1,0 +1,51 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      DEPLOY_BUCKET: ablackcloudapp.com
+      CLOUDFRONT_DISTRIBUTION_ID: E2Y30RJOE2VRP4
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '18'
+          cache: npm
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - run: npm ci --legacy-peer-deps
+      - run: aws s3 cp s3://jet-mysecurebucket/aws-exports.js src/aws-exports.js
+      - run: npm run build
+
+      - name: Sync build to S3
+        run: aws s3 sync build/ s3://${{ env.DEPLOY_BUCKET }}/ --delete
+
+      - name: Set no-cache headers for entry files
+        run: |
+          aws s3 cp build/index.html s3://${{ env.DEPLOY_BUCKET }}/index.html \
+            --cache-control "max-age=0, no-cache, no-store, must-revalidate"
+          aws s3 cp build/service-worker.js s3://${{ env.DEPLOY_BUCKET }}/service-worker.js \
+            --cache-control "max-age=0, no-cache, no-store, must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ env.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/index.html" "/service-worker.js"
