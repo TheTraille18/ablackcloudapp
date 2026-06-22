@@ -40,3 +40,6 @@ amplifyconfiguration.json
 amplify-build-config.json
 amplify-gradle-config.json
 amplifytools.xcconfig
+
+# legacy path (resume lives in public/resume/)
+src/resume/
