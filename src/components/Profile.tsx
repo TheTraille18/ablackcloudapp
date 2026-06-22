@@ -33,7 +33,7 @@ function SkillLevelBar({
       </div>
       <div
         className={classes.skillBarTrack}
-        role="meter"
+        role="progressbar"
         aria-label={`${name} experience level`}
         aria-valuemin={0}
         aria-valuemax={10}
