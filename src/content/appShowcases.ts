@@ -31,7 +31,10 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
     title: 'ablackcloudapp',
     tagline:
       'Serverless app hub on AWS — browse tools, track progress, and explore the architecture.',
-    githubUrl: GITHUB_URL,
+    githubUrl: 'https://github.com/TheTraille18/ablackcloudapp',
+    githubLabel: 'App repo',
+    githubSecondaryUrl: 'https://github.com/TheTraille18/ablackcloudapp-infra',
+    githubSecondaryLabel: 'Infrastructure repo',
     summary: [
       'ablackcloudapp is a serverless app hub built on AWS. It hosts a React TypeScript frontend on S3 and CloudFront, with backend services powered by AppSync, Lambda, and DynamoDB.',
       'The platform showcases multiple tools — including a Task Manager with real-time GraphQL subscriptions — and deploys automatically through GitHub Actions on push to master and dev.',
@@ -46,6 +49,12 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
       { category: 'API & Data', tools: ['GraphQL', 'Apollo Client', 'AWS AppSync SDK'] },
     ],
     progressUpdates: [
+      {
+        date: 'Jun 25, 2026',
+        title: 'GitHub links fixed',
+        detail:
+          'Corrected GitHub repository links across several app showcase pages, including ablackcloudapp, Task Manager, and RAG System.',
+      },
       {
         date: 'Jun 2026',
         title: 'App catalog and routing',
@@ -82,7 +91,7 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
     title: 'Task Manager',
     tagline:
       'Serverless task scheduling with timers, real-time status updates, and GraphQL subscriptions.',
-    githubUrl: GITHUB_URL,
+    githubUrl: 'https://github.com/TheTraille18/TaskManagerApp',
     summary: [
       'Task Manager is a serverless productivity app that lets users create timed tasks and track them in real time. Tasks are stored in DynamoDB and exposed through an AppSync GraphQL API with live subscriptions.',
       'The React frontend uses AWS Amplify to query and mutate tasks, subscribe to status changes, and display countdown timers that update as tasks run, complete, or expire.',
@@ -171,6 +180,11 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
       { category: 'Data', tools: ['ChromaDB', 'S3', 'Chunking pipeline'] },
     ],
     progressUpdates: [
+      {
+        date: 'Jun 25, 2026',
+        title: 'LangChain',
+        detail: 'LangChain support added for document ingestion, retrieval, and RAG pipeline with AWS Bedrock.',
+      },
       {
         date: 'Jun 2026',
         title: 'Project page',
