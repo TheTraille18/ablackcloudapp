@@ -23,7 +23,7 @@ export default function Home() {
 
   const useStyles = makeStyles((theme) => ({
     page: {
-      maxWidth: 1280,
+      maxWidth: 1680,
       margin: '0 auto',
       padding: theme.spacing(3, 3, 6),
       [theme.breakpoints.down('sm')]: {
@@ -31,6 +31,7 @@ export default function Home() {
       },
     },
     hero: {
+      width: '100%',
       textAlign: 'center',
       padding: theme.spacing(4, 2, 5),
     },
