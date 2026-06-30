@@ -107,9 +107,6 @@ function isHotspotBoundaryLine(text: string): boolean {
   if (normalized.includes('internal innovation initiative')) {
     return true;
   }
-  if (normalized.startsWith('atos client:')) {
-    return true;
-  }
   return isSectionHeadingLine(text) || isJobHeadingLine(text);
 }
 
@@ -162,10 +159,25 @@ function getExpandedLineIndices(
   return indices;
 }
 
-function getLineBounds(
-  items: PdfTextItem[],
-  viewport: { width: number; height: number; transform: number[]; scale: number }
-) {
+interface PdfViewport {
+  width: number;
+  height: number;
+  transform: number[];
+  scale: number;
+}
+
+interface PageRenderData {
+  textLayer: HTMLDivElement;
+  viewport: PdfViewport;
+  lines: LineGroup[];
+}
+
+interface GlobalLineRef {
+  pageIndex: number;
+  lineIndex: number;
+}
+
+function getLineBounds(items: PdfTextItem[], viewport: PdfViewport) {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -196,6 +208,78 @@ function getLineBounds(
     width: `${(width / viewport.width) * 100}%`,
     height: `${(height / viewport.height) * 100}%`,
   };
+}
+
+function addHotspotHitArea(
+  textLayer: HTMLDivElement,
+  hotspot: ResumeHotspot,
+  items: PdfTextItem[],
+  viewport: PageRenderData['viewport'],
+  onHotspotClick?: (hotspot: ResumeHotspot) => void
+) {
+  const bounds = getLineBounds(items, viewport);
+  const hitArea = document.createElement('button');
+  hitArea.type = 'button';
+  hitArea.className = 'resume-hotspot';
+  hitArea.setAttribute('aria-label', `More about ${hotspot.title}`);
+  hitArea.style.left = bounds.left;
+  hitArea.style.top = bounds.top;
+  hitArea.style.width = bounds.width;
+  hitArea.style.height = bounds.height;
+  hitArea.onclick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onHotspotClick?.(hotspot);
+  };
+  textLayer.appendChild(hitArea);
+}
+
+function placeHotspotsAcrossPages(
+  pages: PageRenderData[],
+  onHotspotClick?: (hotspot: ResumeHotspot) => void
+) {
+  const globalLines: GlobalLineRef[] = [];
+  const lineGroups: LineGroup[] = [];
+
+  pages.forEach((page, pageIndex) => {
+    page.lines.forEach((line, lineIndex) => {
+      globalLines.push({ pageIndex, lineIndex });
+      lineGroups.push(line);
+    });
+  });
+
+  const usedHotspotIds = new Set<string>();
+  const usedGlobalIndices = new Set<number>();
+
+  globalLines.forEach((_, globalIndex) => {
+    if (usedGlobalIndices.has(globalIndex)) return;
+
+    const hotspot = findResumeHotspot(lineGroups[globalIndex].text);
+    if (!hotspot || usedHotspotIds.has(hotspot.id)) return;
+
+    usedHotspotIds.add(hotspot.id);
+    const expandedIndices = getExpandedLineIndices(lineGroups, globalIndex, hotspot);
+    expandedIndices.forEach((index) => usedGlobalIndices.add(index));
+
+    const itemsByPage = new Map<number, PdfTextItem[]>();
+    expandedIndices.forEach((index) => {
+      const { pageIndex, lineIndex } = globalLines[index];
+      const lineItems = pages[pageIndex].lines[lineIndex].items;
+      const existing = itemsByPage.get(pageIndex) ?? [];
+      existing.push(...lineItems);
+      itemsByPage.set(pageIndex, existing);
+    });
+
+    itemsByPage.forEach((items, pageIndex) => {
+      addHotspotHitArea(
+        pages[pageIndex].textLayer,
+        hotspot,
+        items,
+        pages[pageIndex].viewport,
+        onHotspotClick
+      );
+    });
+  });
 }
 
 export default function ResumePdfViewer({
@@ -248,6 +332,8 @@ export default function ResumePdfViewer({
           containerWidth = container.clientWidth || 860;
         }
 
+        const pages: PageRenderData[] = [];
+
         for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
           if (cancelled) return;
 
@@ -284,36 +370,8 @@ export default function ResumePdfViewer({
           );
 
           const lines = groupTextIntoLines(textItems);
-          const usedHotspotIds = new Set<string>();
-          const usedLineIndices = new Set<number>();
 
-          lines.forEach((line, lineIndex) => {
-            if (usedLineIndices.has(lineIndex)) return;
-
-            const hotspot = findResumeHotspot(line.text);
-            if (!hotspot || usedHotspotIds.has(hotspot.id)) return;
-
-            usedHotspotIds.add(hotspot.id);
-            const expandedIndices = getExpandedLineIndices(lines, lineIndex, hotspot);
-            expandedIndices.forEach((index) => usedLineIndices.add(index));
-
-            const mergedItems = expandedIndices.flatMap((index) => lines[index].items);
-            const bounds = getLineBounds(mergedItems, viewport);
-            const hitArea = document.createElement('button');
-            hitArea.type = 'button';
-            hitArea.className = 'resume-hotspot';
-            hitArea.setAttribute('aria-label', `More about ${hotspot.title}`);
-            hitArea.style.left = bounds.left;
-            hitArea.style.top = bounds.top;
-            hitArea.style.width = bounds.width;
-            hitArea.style.height = bounds.height;
-            hitArea.onclick = (event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              onHotspotClickRef.current?.(hotspot);
-            };
-            textLayer.appendChild(hitArea);
-          });
+          pages.push({ textLayer, viewport, lines });
 
           pageWrap.appendChild(canvas);
           pageWrap.appendChild(textLayer);
@@ -324,6 +382,9 @@ export default function ResumePdfViewer({
         }
 
         if (!cancelled) {
+          placeHotspotsAcrossPages(pages, (hotspot) => {
+            onHotspotClickRef.current?.(hotspot);
+          });
           setLoading(false);
         }
       } catch (err) {
