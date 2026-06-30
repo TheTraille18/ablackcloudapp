@@ -1,4 +1,5 @@
 import { AppShowcaseContent } from '../types/appShowcase';
+import { kubesentryDiagram } from './kubesentryDiagram';
 
 const GITHUB_URL = 'https://github.com/TheTraille18/';
 
@@ -220,42 +221,35 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
   'kubesentry-ai': {
     title: 'KubeSentry AI',
     tagline:
-      'AI-powered Kubernetes monitoring, anomaly detection, and intelligent alerting for clusters.',
+      'AI-driven Kubernetes incident response — observability, agents, and chaos engineering in one platform.',
     githubUrl: GITHUB_URL,
-    workInProgress: true,
     summary: [
-      'KubeSentry AI aims to watch Kubernetes clusters for unusual behavior — failed pods, resource spikes, and deployment regressions — and explain what went wrong using AI-assisted analysis.',
-      'Metrics and events from the cluster feed into an anomaly detection layer that correlates signals and surfaces actionable alerts instead of raw log noise.',
+      'KubeSentry is an AI-driven Kubernetes incident response platform that combines observability, AI agents, and chaos engineering to detect, investigate, and validate issues in Kubernetes environments.',
+      'The goal is to reduce the time engineers spend diagnosing production incidents by automating root cause analysis and providing actionable recommendations.',
     ],
     architectureCaption:
-      'Cluster metrics and events flow from Prometheus and the Kubernetes API into an analysis pipeline. An AI layer interprets anomalies, correlates root causes, and sends alerts to operators through a dashboard or notification channel.',
-    diagram: {
-      viewBox: '0 0 760 400',
-      boxes: [
-        { x: 40, y: 60, w: 170, h: 52, label: 'Kubernetes', sublabel: 'Cluster', fill: 'rgba(0,166,153,0.35)' },
-        { x: 280, y: 60, w: 200, h: 52, label: 'Prometheus', sublabel: 'Metrics', fill: 'rgba(0,0,0,0.45)' },
-        { x: 520, y: 60, w: 200, h: 52, label: 'Event stream', sublabel: 'K8s API', fill: 'rgba(0,0,0,0.35)' },
-        { x: 160, y: 180, w: 200, h: 52, label: 'Anomaly engine', sublabel: 'Detection', fill: 'rgba(255,90,95,0.35)' },
-        { x: 400, y: 180, w: 200, h: 52, label: 'AI analysis', sublabel: 'Root cause', fill: 'rgba(255,90,95,0.25)' },
-        { x: 280, y: 300, w: 200, h: 52, label: 'Alerts', sublabel: 'Dashboard', fill: 'rgba(0,166,153,0.25)' },
-      ],
-      arrows: [
-        { x1: 210, y1: 86, x2: 278, y2: 86 },
-        { x1: 480, y1: 86, x2: 518, y2: 86 },
-        { x1: 380, y1: 112, x2: 260, y2: 178 },
-        { x1: 620, y1: 112, x2: 500, y2: 178 },
-        { x1: 360, y1: 206, x2: 398, y2: 206 },
-        { x1: 500, y1: 232, x2: 380, y2: 298 },
-      ],
-      footer: 'Work in progress — planned K8s observability with AI-assisted incident analysis',
-      workInProgress: true,
-    },
+      'Kubernetes API data and Prometheus, CloudWatch, and log streams feed a data collector that normalizes pods, events, metrics, and deployments. A LangGraph AI agent orchestrates multi-step investigation using Kubernetes tools and optional web search, with Claude on Amazon Bedrock driving root cause analysis, confidence scoring, and remediation recommendations delivered to Slack, Jira, ServiceNow, dashboards, or email. A separate chaos engineering pipeline uses LitmusChaos, Chaos Mesh, or AWS FIS to inject failures and validate that KubeSentry detects and diagnoses incidents correctly.',
+    diagram: kubesentryDiagram,
     toolsUsed: [
-      { category: 'Platform', tools: ['Kubernetes', 'Prometheus', 'Helm'] },
-      { category: 'AI', tools: ['LLM', 'Anomaly detection', 'Event correlation'] },
-      { category: 'Backend', tools: ['Go', 'Python', 'gRPC', 'Webhooks'] },
+      { category: 'Platform', tools: ['Kubernetes', 'EKS', 'Prometheus', 'CloudWatch', 'Helm'] },
+      { category: 'AI', tools: ['LangGraph', 'Claude', 'Amazon Bedrock', 'Titan Embeddings'] },
+      { category: 'Integrations', tools: ['Slack', 'Jira', 'ServiceNow', 'kubectl'] },
+      { category: 'Chaos', tools: ['LitmusChaos', 'Chaos Mesh', 'AWS FIS'] },
+      { category: 'Backend', tools: ['Go', 'Web search', 'Event correlation'] },
     ],
     progressUpdates: [
+      {
+        date: 'Jun 29, 2026',
+        title: 'Go backend + Kubernetes data collection',
+        detail:
+          'Scaffolded the production Go layout with server and worker entrypoints, detector, and in-memory alert store. Integrated client-go to list pods and events, built a pod-failure detector, and wired a worker that polls the online-boutique namespace every 30s. Added an HTTP API for health checks and listing alerts, moved the Online Boutique Helm chart to deployments/helm/online-boutique, stood up a local kind cluster for testing, and added Makefile targets for build, run-server, run-worker, helm-install, and port-forward.',
+      },
+      {
+        date: 'Jun 2026',
+        title: 'Architecture design',
+        detail:
+          'Documented the full incident response pipeline — data collector, LangGraph agent, Bedrock analysis, notification channels, and chaos validation flow.',
+      },
       {
         date: 'Jun 2026',
         title: 'Project page',
@@ -263,13 +257,18 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
       },
       {
         date: 'Planned',
-        title: 'Metrics collector',
-        detail: 'Integrate Prometheus and Kubernetes event watchers for cluster telemetry.',
+        title: 'Data collector',
+        detail: 'Integrate Kubernetes API, Prometheus, CloudWatch, and log streams into a unified collector.',
       },
       {
         date: 'Planned',
-        title: 'AI alert summaries',
-        detail: 'Generate human-readable incident summaries from correlated cluster signals.',
+        title: 'LangGraph investigation agent',
+        detail: 'Build multi-step incident workflows with Kubernetes tools and optional web search fallback.',
+      },
+      {
+        date: 'Planned',
+        title: 'Chaos validation',
+        detail: 'Run LitmusChaos, Chaos Mesh, or AWS FIS experiments to verify detection and diagnosis.',
       },
     ],
   },

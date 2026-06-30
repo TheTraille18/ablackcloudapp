@@ -52,6 +52,7 @@ function Box({
   h,
   label,
   sublabel,
+  lines,
   fill,
 }: {
   x: number;
@@ -60,8 +61,15 @@ function Box({
   h: number;
   label: string;
   sublabel?: string;
+  lines?: string[];
   fill: string;
 }) {
+  const detailLines = lines ?? [];
+  const hasSublabel = Boolean(sublabel);
+  const titleY = y + (hasSublabel || detailLines.length > 0 ? 18 : h / 2 + 5);
+  const sublabelY = y + 34;
+  const detailsStartY = y + (hasSublabel ? 50 : 36);
+
   return (
     <g>
       <rect
@@ -76,7 +84,7 @@ function Box({
       />
       <text
         x={x + w / 2}
-        y={y + (sublabel ? h / 2 - 4 : h / 2 + 5)}
+        y={titleY}
         textAnchor="middle"
         fill="#ffffff"
         fontSize={13}
@@ -87,7 +95,7 @@ function Box({
       {sublabel && (
         <text
           x={x + w / 2}
-          y={y + h / 2 + 14}
+          y={sublabelY}
           textAnchor="middle"
           fill="rgba(255,255,255,0.75)"
           fontSize={11}
@@ -95,6 +103,18 @@ function Box({
           {sublabel}
         </text>
       )}
+      {detailLines.map((line, index) => (
+        <text
+          key={`${line}-${index}`}
+          x={x + w / 2}
+          y={detailsStartY + index * 14}
+          textAnchor="middle"
+          fill="rgba(255,255,255,0.75)"
+          fontSize={10}
+        >
+          {line}
+        </text>
+      ))}
     </g>
   );
 }

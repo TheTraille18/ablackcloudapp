@@ -19,6 +19,12 @@ const statusStyles: Record<
     color: '#0a1628',
     borderColor: 'rgba(126, 200, 255, 1)',
   },
+  'In Progress': {
+    label: 'In Progress',
+    backgroundColor: 'rgba(255, 180, 50, 0.92)',
+    color: '#1a1400',
+    borderColor: 'rgba(255, 200, 80, 1)',
+  },
   Beta: {
     label: 'Beta',
     backgroundColor: 'rgba(123, 97, 255, 0.92)',

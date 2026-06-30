@@ -16,6 +16,8 @@ export interface DiagramBox {
   h: number;
   label: string;
   sublabel?: string;
+  /** Additional detail lines rendered inside the box (smaller text). */
+  lines?: string[];
   fill: string;
 }
 
