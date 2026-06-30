@@ -28,6 +28,7 @@ export interface TaskFormValues {
 export type AppStatus =
   | 'Live'
   | 'In Development'
+  | 'In Progress'
   | 'Beta'
   | 'Planned'
   | 'POC'
