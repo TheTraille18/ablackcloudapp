@@ -6,6 +6,8 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 import clsx from 'clsx';
 import AppArchitectureDiagram from './AppArchitectureDiagram';
 import AppStatusBadge from './AppStatusBadge';
+import ExpandableProgressDetail from './ExpandableProgressDetail';
+import AppRoadmapPhases from './AppRoadmapPhases';
 import { getCatalogAppBySlug } from '../data/apps';
 import { AppShowcaseContent } from '../types/appShowcase';
 import { airbnbColors } from '../theme/airbnbTheme';
@@ -25,8 +27,12 @@ export default function AppShowcasePage({
 }: AppShowcasePageProps) {
   const useStyles = makeStyles((theme) => ({
     page: {
-      maxWidth: 1200,
+      maxWidth: 1920,
       margin: '0 auto',
+      padding: theme.spacing(3, 2, 6),
+    },
+    pageDefault: {
+      maxWidth: 1200,
       padding: theme.spacing(3, 3, 6),
     },
     layout: {
@@ -38,13 +44,78 @@ export default function AppShowcasePage({
         gridTemplateColumns: '1fr',
       },
     },
+    layoutWithRoadmap: {
+      gridTemplateColumns: 'minmax(540px, 600px) minmax(0, 1fr) 380px',
+      gap: theme.spacing(2.5),
+      [theme.breakpoints.down('lg')]: {
+        gridTemplateColumns: '1fr 340px',
+      },
+      [theme.breakpoints.down('md')]: {
+        gridTemplateColumns: '1fr',
+      },
+    },
     mainColumn: {
       minWidth: 0,
     },
+    roadmapColumn: {
+      minWidth: 0,
+      [theme.breakpoints.down('lg')]: {
+        order: 3,
+        gridColumn: '1 / -1',
+      },
+    },
     sidebarColumn: {
-      [theme.breakpoints.up('md')]: {
-        position: 'sticky',
-        top: theme.spacing(10),
+      [theme.breakpoints.down('lg')]: {
+        order: 2,
+      },
+    },
+    summaryScrollCard: {
+      display: 'flex',
+      flexDirection: 'column',
+      maxHeight: 320,
+      overflow: 'hidden',
+      [theme.breakpoints.down('md')]: {
+        maxHeight: 260,
+      },
+    },
+    sidebarScrollCard: {
+      display: 'flex',
+      flexDirection: 'column',
+      maxHeight: 'calc(100vh - 88px)',
+      overflow: 'hidden',
+      marginBottom: 0,
+      [theme.breakpoints.down('md')]: {
+        maxHeight: '70vh',
+      },
+    },
+    sidebarSectionTitle: {
+      flexShrink: 0,
+      marginBottom: theme.spacing(1.5),
+    },
+    roadmapSectionTitle: {
+      fontSize: '2rem',
+      fontWeight: 800,
+    },
+    cardScrollBody: {
+      flex: '1 1 auto',
+      minHeight: 0,
+      overflowY: 'auto',
+      paddingRight: theme.spacing(0.5),
+      marginRight: theme.spacing(-0.5),
+      scrollbarWidth: 'thin',
+      scrollbarColor: 'rgba(126, 200, 255, 0.45) transparent',
+      '&::-webkit-scrollbar': {
+        width: 6,
+      },
+      '&::-webkit-scrollbar-track': {
+        background: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: 'rgba(126, 200, 255, 0.35)',
+        borderRadius: 3,
+      },
+      '&::-webkit-scrollbar-thumb:hover': {
+        backgroundColor: 'rgba(126, 200, 255, 0.55)',
       },
     },
     card: {
@@ -59,6 +130,12 @@ export default function AppShowcasePage({
     },
     sidebarCard: {
       marginBottom: 0,
+    },
+    stickySidebar: {
+      [theme.breakpoints.up('md')]: {
+        position: 'sticky',
+        top: theme.spacing(10),
+      },
     },
     title: {
       fontWeight: 800,
@@ -248,6 +325,7 @@ export default function AppShowcasePage({
     diagram,
     toolsUsed,
     progressUpdates,
+    roadmapPhases,
     workInProgress,
   } = content;
 
@@ -258,10 +336,27 @@ export default function AppShowcasePage({
     ...diagram,
     workInProgress: showArchitectureWip,
   };
+  const hasRoadmap = Boolean(roadmapPhases && roadmapPhases.length > 0);
 
   return (
-    <div className={classes.page}>
-      <div className={classes.layout}>
+    <div className={clsx(classes.page, !hasRoadmap && classes.pageDefault)}>
+      <div className={clsx(classes.layout, hasRoadmap && classes.layoutWithRoadmap)}>
+        {hasRoadmap && (
+          <aside className={clsx(classes.roadmapColumn, classes.stickySidebar)}>
+            <div className={`${classes.card} ${classes.sidebarScrollCard}`}>
+              <Typography
+                className={clsx(classes.sectionTitle, classes.sidebarSectionTitle, classes.roadmapSectionTitle)}
+                component="h2"
+              >
+                Roadmap
+              </Typography>
+              <div className={classes.cardScrollBody}>
+                <AppRoadmapPhases phases={roadmapPhases!} />
+              </div>
+            </div>
+          </aside>
+        )}
+
         <div className={classes.mainColumn}>
           <div className={classes.card}>
             <div className={classes.titleRow}>
@@ -299,15 +394,17 @@ export default function AppShowcasePage({
             )}
           </div>
 
-          <div className={classes.card}>
-            <Typography className={classes.sectionTitle} component="h2">
+          <div className={`${classes.card} ${classes.summaryScrollCard}`}>
+            <Typography className={clsx(classes.sectionTitle, classes.sidebarSectionTitle)} component="h2">
               Summary
             </Typography>
-            {summary.map((paragraph) => (
-              <Typography key={paragraph} className={classes.bodyText} component="p">
-                {paragraph}
-              </Typography>
-            ))}
+            <div className={classes.cardScrollBody}>
+              {summary.map((paragraph) => (
+                <Typography key={paragraph} className={classes.bodyText} component="p">
+                  {paragraph}
+                </Typography>
+              ))}
+            </div>
           </div>
 
           <div className={classes.card}>
@@ -367,22 +464,27 @@ export default function AppShowcasePage({
           )}
         </div>
 
-        <aside className={classes.sidebarColumn}>
-          <div className={`${classes.card} ${classes.sidebarCard}`}>
-            <Typography className={classes.sectionTitle} component="h2">
+        <aside className={clsx(classes.sidebarColumn, classes.stickySidebar)}>
+          <div className={`${classes.card} ${classes.sidebarScrollCard}`}>
+            <Typography className={clsx(classes.sectionTitle, classes.sidebarSectionTitle)} component="h2">
               Progress updates
             </Typography>
-            <ul className={classes.timeline}>
-              {progressUpdates.map((update) => (
-                <li key={`${update.date}-${update.title}`} className={classes.timelineItem}>
-                  <Typography className={classes.updateDate}>{update.date}</Typography>
-                  <Typography className={classes.updateTitle} component="h3">
-                    {update.title}
-                  </Typography>
-                  <Typography className={classes.updateDetail}>{update.detail}</Typography>
-                </li>
-              ))}
-            </ul>
+            <div className={classes.cardScrollBody}>
+              <ul className={classes.timeline}>
+                {progressUpdates.map((update) => (
+                  <li key={`${update.date}-${update.title}`} className={classes.timelineItem}>
+                    <Typography className={classes.updateDate}>{update.date}</Typography>
+                    <Typography className={classes.updateTitle} component="h3">
+                      {update.title}
+                    </Typography>
+                    <ExpandableProgressDetail
+                      detail={update.detail}
+                      className={classes.updateDetail}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </aside>
       </div>

@@ -9,7 +9,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       w: 300,
       h: 52,
       label: 'Kubernetes Cluster',
-      sublabel: 'EKS or any K8s',
+      sublabel: 'kind / EKS',
       fill: 'rgba(0,166,153,0.35)',
     },
     {
@@ -18,7 +18,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       w: 220,
       h: 108,
       label: 'Kubernetes API',
-      lines: ['Pod Status', 'Events', 'Deployments'],
+      lines: ['List Pods', 'Describe Pod', 'Logs + Events'],
       fill: 'rgba(0,0,0,0.45)',
     },
     {
@@ -28,15 +28,15 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       h: 108,
       label: 'Prometheus / Metrics',
       lines: ['CloudWatch', 'Logs', 'Alerts'],
-      fill: 'rgba(0,0,0,0.45)',
+      fill: 'rgba(0,0,0,0.25)',
     },
     {
       x: 240,
       y: 268,
       w: 400,
       h: 118,
-      label: 'Data Collector',
-      lines: ['Pods', 'Logs', 'Events', 'Metrics', 'Deployments'],
+      label: 'Worker + Detector',
+      lines: ['Poll every 30s', 'CrashLoopBackOff', 'ImagePullBackOff', 'PodFailed rules'],
       fill: 'rgba(255,90,95,0.35)',
     },
     {
@@ -44,8 +44,8 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       y: 426,
       w: 480,
       h: 118,
-      label: 'AI Agent (LangGraph)',
-      lines: ['Incident State', 'Tool Selection', 'Investigation Workflow', 'Multi-step Reasoning'],
+      label: 'Go Agent Orchestrator',
+      lines: ['Planner (rule-based)', 'Tool Runner', 'Incident State', 'Single Bedrock RCA'],
       fill: 'rgba(255,90,95,0.25)',
     },
     {
@@ -54,7 +54,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       w: 240,
       h: 100,
       label: 'Kubernetes Tools',
-      lines: ['kubectl', 'Metrics', 'Events'],
+      lines: ['DescribePod', 'GetPodLogs', 'ListEvents'],
       fill: 'rgba(0,0,0,0.45)',
     },
     {
@@ -62,9 +62,9 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       y: 582,
       w: 240,
       h: 100,
-      label: 'Web Search (optional)',
+      label: 'Web Search (planned)',
       lines: ['AWS Docs', 'CVEs', 'Kubernetes Docs'],
-      fill: 'rgba(0,0,0,0.45)',
+      fill: 'rgba(0,0,0,0.25)',
     },
     {
       x: 240,
@@ -72,7 +72,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       w: 400,
       h: 88,
       label: 'Amazon Bedrock',
-      lines: ['Claude', 'Titan Embeddings (optional)'],
+      lines: ['Claude Sonnet 4', 'One prompt per incident'],
       fill: 'rgba(0,166,153,0.35)',
     },
     {
@@ -81,7 +81,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       w: 480,
       h: 100,
       label: 'Root Cause Analysis',
-      lines: ['Confidence Score', 'Suggested Remediation', 'YAML / kubectl Recommendations'],
+      lines: ['Confidence Score', 'Suggested Remediation', 'kubectl / YAML Recommendations'],
       fill: 'rgba(255,90,95,0.35)',
     },
     {
@@ -89,7 +89,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       y: 978,
       w: 640,
       h: 56,
-      label: 'Slack ù Jira / ServiceNow ù Dashboard ù Email',
+      label: 'HTTP API + Alert Store ? Slack / Jira / Dashboard (planned)',
       fill: 'rgba(0,166,153,0.25)',
     },
     {
@@ -97,7 +97,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       y: 1068,
       w: 560,
       h: 40,
-      label: 'Chaos Engineering / Validation Pipeline',
+      label: 'Chaos Engineering / Validation Pipeline (planned)',
       fill: 'rgba(255,180,50,0.3)',
     },
     {
@@ -143,5 +143,5 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
     { x1: 440, y1: 1184, x2: 440, y2: 1208 },
     { x1: 440, y1: 1310, x2: 440, y2: 1336 },
   ],
-  footer: 'Incident response pipeline + chaos validation to prove detection and diagnosis',
+  footer: 'Go worker polls the cluster, plans evidence gathering, and calls Bedrock once per incident ? chaos validation planned',
 };

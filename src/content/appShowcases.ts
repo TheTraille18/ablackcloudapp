@@ -1,5 +1,6 @@
 import { AppShowcaseContent } from '../types/appShowcase';
 import { kubesentryDiagram } from './kubesentryDiagram';
+import { kubesentryPhases } from './kubesentryPhases';
 
 const GITHUB_URL = 'https://github.com/TheTraille18/';
 
@@ -50,6 +51,12 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
       { category: 'API & Data', tools: ['GraphQL', 'Apollo Client', 'AWS AppSync SDK'] },
     ],
     progressUpdates: [
+      {
+        date: 'Jul 6, 2026',
+        title: 'KubeSentry roadmap layout + showcase polish',
+        detail:
+          'Added a left-column Roadmap section on the KubeSentry showcase with an 8-phase plan (Phase 1 marked complete). Widened the 3-column layout, made the Roadmap heading larger, and added matching thin scrollbars on the roadmap, progress updates, and summary when content overflows. Updated the KubeSentry summary to reflect the shipped agent baseline. Removed the green highlight box on completed roadmap phases. Also shipped expandable progress updates — long entries show a "..." preview and expand inline on click.',
+      },
       {
         date: 'Jun 25, 2026',
         title: 'GitHub links fixed',
@@ -222,22 +229,36 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
     title: 'KubeSentry AI',
     tagline:
       'AI-driven Kubernetes incident response — observability, agents, and chaos engineering in one platform.',
-    githubUrl: GITHUB_URL,
+    githubUrl: 'https://github.com/TheTraille18/kubeSentryAI',
     summary: [
-      'KubeSentry is an AI-driven Kubernetes incident response platform that combines observability, AI agents, and chaos engineering to detect, investigate, and validate issues in Kubernetes environments.',
-      'The goal is to reduce the time engineers spend diagnosing production incidents by automating root cause analysis and providing actionable recommendations.',
+      'KubeSentry AI is an alert-driven Kubernetes incident response platform. Phase 1 is complete: a Go worker polls the cluster every 30 seconds, a rule-based detector flags unhealthy pods (CrashLoopBackOff, ImagePullBackOff, PodFailed, and more), and a Go agent orchestrator gathers evidence before calling Claude on Amazon Bedrock once per incident.',
+      'The agent uses a lightweight LangGraph-style layout in Go — shared State, a Planner that picks tools by failure type, and a ToolRunner for DescribePod, GetPodLogs (with --previous fallback), and ListEvents. Root cause analysis is stored on each alert and served through an HTTP API alongside pod summaries.',
+      'The left-column roadmap outlines Phases 2–8: smarter planning, RAG runbooks, structured diagnosis, GitHub source tracing, incident memory, an investigation timeline UI, and advanced features like Prometheus metrics, Slack notifications, and chaos validation.',
     ],
     architectureCaption:
-      'Kubernetes API data and Prometheus, CloudWatch, and log streams feed a data collector that normalizes pods, events, metrics, and deployments. A LangGraph AI agent orchestrates multi-step investigation using Kubernetes tools and optional web search, with Claude on Amazon Bedrock driving root cause analysis, confidence scoring, and remediation recommendations delivered to Slack, Jira, ServiceNow, dashboards, or email. A separate chaos engineering pipeline uses LitmusChaos, Chaos Mesh, or AWS FIS to inject failures and validate that KubeSentry detects and diagnoses incidents correctly.',
+      'The worker polls the Kubernetes API via client-go, and the detector turns unhealthy pod states into alerts. A Go agent orchestrator — with a rule-based planner, evidence-gathering tools (describe pod, logs, events), and a single Claude call on Amazon Bedrock — produces root cause analysis stored on each alert. An HTTP API serves alerts and pod summaries. Prometheus, CloudWatch, notification channels (Slack, Jira), and a chaos validation pipeline are planned next.',
     diagram: kubesentryDiagram,
+    roadmapPhases: kubesentryPhases,
     toolsUsed: [
-      { category: 'Platform', tools: ['Kubernetes', 'EKS', 'Prometheus', 'CloudWatch', 'Helm'] },
-      { category: 'AI', tools: ['LangGraph', 'Claude', 'Amazon Bedrock', 'Titan Embeddings'] },
-      { category: 'Integrations', tools: ['Slack', 'Jira', 'ServiceNow', 'kubectl'] },
-      { category: 'Chaos', tools: ['LitmusChaos', 'Chaos Mesh', 'AWS FIS'] },
-      { category: 'Backend', tools: ['Go', 'Web search', 'Event correlation'] },
+      { category: 'Platform', tools: ['Kubernetes', 'kind', 'EKS', 'Helm', 'Online Boutique'] },
+      { category: 'AI', tools: ['Go Agent Orchestrator', 'Rule-based Planner', 'Claude', 'Amazon Bedrock'] },
+      { category: 'Backend', tools: ['Go', 'client-go', 'Worker + Server binaries'] },
+      { category: 'Kubernetes Tools', tools: ['DescribePod', 'GetPodLogs', 'ListEvents'] },
+      { category: 'Planned', tools: ['Alert dedup', 'Shared storage', 'Slack / Jira', 'LitmusChaos', 'Chaos Mesh'] },
     ],
     progressUpdates: [
+      {
+        date: 'Jul 6, 2026',
+        title: 'Roadmap phases reorganized',
+        detail:
+          'Restructured the project roadmap so Phase 1 reflects the current shipped baseline: alert-driven worker, detector, Go agent orchestrator, client-go tools, and Bedrock RCA. Moved smarter planning, RAG, structured diagnosis, GitHub analysis, incident memory, UI timeline, and advanced features into Phases 2–8. Added a Roadmap section to the showcase page.',
+      },
+      {
+        date: 'Jul 5, 2026',
+        title: 'Go agent orchestrator + Bedrock RCA',
+        detail:
+          'Built the full investigation agent in internal/agent/: a rule-based planner selects tools by failure type (CrashLoopBackOff → describe + logs, ImagePullBackOff → describe + events), a ToolRunner gathers evidence from client-go without calling the LLM, and the orchestrator makes one Bedrock call per incident with a combined prompt. Wired Orchestrator.Investigate into pollPods so each alert gets an RCA saved on the alert model. Added DescribePod, GetPodLogs with --previous fallback, and ListEvents tools.',
+      },
       {
         date: 'Jun 29, 2026',
         title: 'Go backend + Kubernetes data collection',
@@ -248,27 +269,12 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
         date: 'Jun 2026',
         title: 'Architecture design',
         detail:
-          'Documented the full incident response pipeline — data collector, LangGraph agent, Bedrock analysis, notification channels, and chaos validation flow.',
+          'Documented the incident response pipeline — worker, detector, Go agent orchestrator, Bedrock analysis, notification channels, and chaos validation flow.',
       },
       {
         date: 'Jun 2026',
         title: 'Project page',
         detail: 'Added showcase documentation with architecture overview and planned tooling.',
-      },
-      {
-        date: 'Planned',
-        title: 'Data collector',
-        detail: 'Integrate Kubernetes API, Prometheus, CloudWatch, and log streams into a unified collector.',
-      },
-      {
-        date: 'Planned',
-        title: 'LangGraph investigation agent',
-        detail: 'Build multi-step incident workflows with Kubernetes tools and optional web search fallback.',
-      },
-      {
-        date: 'Planned',
-        title: 'Chaos validation',
-        detail: 'Run LitmusChaos, Chaos Mesh, or AWS FIS experiments to verify detection and diagnosis.',
       },
     ],
   },

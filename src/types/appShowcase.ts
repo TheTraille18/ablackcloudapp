@@ -4,6 +4,18 @@ export interface ProgressUpdate {
   detail: string;
 }
 
+export type RoadmapPhaseStatus = 'complete' | 'in-progress' | 'planned';
+
+export interface RoadmapPhase {
+  number: number;
+  title: string;
+  status: RoadmapPhaseStatus;
+  summary: string;
+  /** Optional multiline flow diagram shown in monospace. */
+  flow?: string;
+  items: string[];
+}
+
 export interface ToolGroup {
   category: string;
   tools: string[];
@@ -51,6 +63,8 @@ export interface AppShowcaseContent {
   diagram: ArchitectureDiagramConfig;
   toolsUsed: ToolGroup[];
   progressUpdates: ProgressUpdate[];
+  /** Optional phased roadmap (e.g. KubeSentry). */
+  roadmapPhases?: RoadmapPhase[];
   /** Show work-in-progress notices on architecture and tools sections. */
   workInProgress?: boolean;
 }
