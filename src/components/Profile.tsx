@@ -10,6 +10,7 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 import SearchIcon from '@material-ui/icons/Search';
 import clsx from 'clsx';
 import ResumePdfViewer from './ResumePdfViewer';
+import ExpandableProgressDetail from './ExpandableProgressDetail';
 import { resumeUpdates } from '../content/resumePage';
 import { ResumeHotspot, ResumeHotspotSection } from '../content/resumeHotspots';
 import { airbnbColors } from '../theme/airbnbTheme';
@@ -659,7 +660,10 @@ export default function Profile() {
                   <Typography className={classes.updateTitle} component="h3">
                     {update.title}
                   </Typography>
-                  <Typography className={classes.updateDetail}>{update.detail}</Typography>
+                  <ExpandableProgressDetail
+                    detail={update.detail}
+                    className={classes.updateDetail}
+                  />
                 </li>
               ))}
             </ul>

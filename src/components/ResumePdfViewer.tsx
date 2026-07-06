@@ -107,6 +107,12 @@ function isHotspotBoundaryLine(text: string): boolean {
   if (normalized.includes('internal innovation initiative')) {
     return true;
   }
+  if (normalized === 'ai & cloud projects') {
+    return true;
+  }
+  if (normalized.includes('kubesentry ai')) {
+    return true;
+  }
   return isSectionHeadingLine(text) || isJobHeadingLine(text);
 }
 
@@ -116,6 +122,7 @@ const RESUME_SECTION_HEADINGS = new Set([
   'technical skills',
   'professional experience',
   'projects',
+  'ai & cloud projects',
   'previous experience',
   'education',
 ]);
