@@ -2,6 +2,12 @@ import { ProgressUpdate } from '../types/appShowcase';
 
 export const resumeUpdates: ProgressUpdate[] = [
   {
+    date: 'Jul 6, 2026',
+    title: 'Resume PDF update + interactive hotspots',
+    detail:
+      'Updated the resume PDF with current projects and experience, including KubeSentry AI, the Internal Innovation Initiative, and recent client work. On the interactive resume, added a clickable KubeSentry AI hotspot with a full project description and GitHub link. Fixed overlapping click boxes so the Internal Innovation area no longer covers the AI & Cloud Projects heading.',
+  },
+  {
     date: 'Jun 2026',
     title: 'Interactive resume',
     detail:

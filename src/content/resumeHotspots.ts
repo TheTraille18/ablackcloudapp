@@ -211,6 +211,16 @@ export const resumeHotspots: ResumeHotspot[] = [
     expandThroughBullets: true,
   },
   {
+    id: 'kubesentry-ai',
+    match: 'KubeSentry AI',
+    title: 'KubeSentry AI',
+    detail:
+      'KubeSentry AI is a personal project building an AI-powered Kubernetes incident response platform in Go. Phase 1 is complete: a worker polls the cluster every 30 seconds, a rule-based detector flags unhealthy pods (CrashLoopBackOff, ImagePullBackOff, PodFailed, and related states), and a Go agent orchestrator gathers evidence before calling Claude on Amazon Bedrock once per incident.\n\nThe agent follows a lightweight LangGraph-style pattern in Go — shared State, a Planner that selects tools by failure type, and a ToolRunner for DescribePod, GetPodLogs (with --previous fallback), and ListEvents. Root cause analysis is stored on each alert and exposed through an HTTP API alongside pod summaries. Development and testing use a local kind cluster with the Online Boutique demo workload.\n\nPlanned next phases include smarter describe-first planning, RAG-backed runbooks, structured diagnosis output, GitHub source tracing for stack traces, incident memory, and an investigation timeline UI. Portfolio: ablackcloudapp.com/apps/kubesentry-ai',
+    link: 'https://github.com/TheTraille18/kubeSentryAI',
+    linkLabel: 'View on GitHub',
+    expandThroughBullets: true,
+  },
+  {
     id: 'bedrock-poc',
     match: 'Internal Innovation Initiative',
     title: 'Internal Innovation Initiative',
