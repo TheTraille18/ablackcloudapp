@@ -55,8 +55,17 @@ function SkillLevelBar({
   );
 }
 
-const RESUME_PDF_URL =
+const RESUME_PDF_BASE =
   process.env.REACT_APP_RESUME_PDF_URL || '/resume/Justin_Traille.pdf';
+
+function resumePdfUrl(): string {
+  const version = process.env.REACT_APP_RESUME_VERSION;
+  if (!version) {
+    return RESUME_PDF_BASE;
+  }
+  const separator = RESUME_PDF_BASE.includes('?') ? '&' : '?';
+  return `${RESUME_PDF_BASE}${separator}v=${version}`;
+}
 
 function normalizeSkillSearchText(value: string): string {
   return value.replace(/^\*/, '').trim().toLowerCase();
@@ -481,7 +490,7 @@ export default function Profile() {
           variant="outlined"
           size="small"
           startIcon={<OpenInNewIcon />}
-          href={RESUME_PDF_URL}
+          href={resumePdfUrl()}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -492,7 +501,7 @@ export default function Profile() {
           variant="outlined"
           size="small"
           startIcon={<GetAppIcon />}
-          href={RESUME_PDF_URL}
+          href={resumePdfUrl()}
           download="Justin_Traille.pdf"
         >
           Download
@@ -631,7 +640,7 @@ export default function Profile() {
                 className={classes.actionBtn}
                 variant="outlined"
                 startIcon={<OpenInNewIcon />}
-                href={RESUME_PDF_URL}
+                href={resumePdfUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ marginTop: 16 }}
@@ -641,7 +650,7 @@ export default function Profile() {
             </div>
           ) : (
             <ResumePdfViewer
-              url={RESUME_PDF_URL}
+              url={resumePdfUrl()}
               onError={handleError}
               onHotspotClick={handleHotspotClick}
             />

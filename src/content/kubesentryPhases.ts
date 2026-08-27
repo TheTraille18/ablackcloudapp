@@ -23,27 +23,29 @@ export const kubesentryPhases: RoadmapPhase[] = [
       'Rule-based plans (CrashLoopBackOff -> describe + logs; ImagePullBackOff -> describe + events)',
       'Amazon Bedrock / Claude RCA per incident',
       'HTTP API: health, alerts, pods',
-      'In-memory alert store with RCA + InvestigatedAt',
+      'In-memory alert store with RCA + InvestigatedAt (superseded by S3 persistence)',
+      'S3-backed alert + RCA JSON store',
+      'PendingTooLong detection',
       'kind cluster + Online Boutique demo workload',
     ],
   },
   {
     number: 2,
     title: 'Smarter planner & agent nodes',
-    status: 'planned',
+    status: 'complete',
     summary:
-      'Structure the agent like a lightweight LangGraph in Go — formal nodes, describe-first planning, and richer failure-specific workflows.',
+      'Agent control flow is now an explicit LangGraph-style graph in Go (nodes, edges, conditional routing). MCP exposes Kubernetes tools to the agent. Remaining items: describe-first shortcuts and stronger alert dedup.',
     flow: `Alert
-  -> Planner inspects reason + describe output
-  -> Run only needed nodes
-  -> Diagnosis`,
+  -> Graph nodes + conditional edges
+  -> MCP tools (describe / logs / events)
+  -> Bedrock RCA
+  -> S3`,
     items: [
-      'Formal node registry (each step = one node function)',
-      'Describe-first planning — skip logs when describe already shows OOMKilled or image pull errors',
-      'CrashLoopBackOff -> describe -> logs only if needed -> diagnosis',
-      'Pending -> describe -> events -> node/resource checks',
-      'ImagePullBackOff -> describe -> events -> image/registry checks',
-      'Alert dedup — avoid re-investigating the same pod + reason every 30s',
+      'Formal graph: nodes, edges, conditional routing, shared State',
+      'MCP server/client for DescribePod, GetPodLogs, ListEvents',
+      'PendingTooLong detector rule',
+      'Describe-first planning ï¿½ skip logs when describe already shows OOMKilled or image pull errors (next)',
+      'Alert dedup ï¿½ avoid re-investigating the same pod + reason every 30s (next)',
       'Investigation step log on State (feeds Phase 7 UI)',
       'User-initiated investigate API (optional entry point besides worker)',
     ],
@@ -71,7 +73,7 @@ export const kubesentryPhases: RoadmapPhase[] = [
     title: 'Structured AI diagnosis',
     status: 'planned',
     summary:
-      'Upgrade Bedrock output from free text to structured fields — confidence, evidence, and remediation — stored on each alert.',
+      'Upgrade Bedrock output from free text to structured fields ï¿½ confidence, evidence, and remediation ï¿½ stored on each alert.',
     flow: `Pod status + describe + logs + events + docs
   -> Bedrock
   -> Root cause + fix + confidence score`,
@@ -104,17 +106,18 @@ export const kubesentryPhases: RoadmapPhase[] = [
   {
     number: 6,
     title: 'Incident memory',
-    status: 'planned',
+    status: 'in-progress',
     summary:
-      'Persist past incidents and resolutions so similar problems can recommend proven fixes.',
+      'Alerts and RCA now persist to S3 so worker and API share durable state. Next: similarity search over past incidents to recommend proven fixes.',
     flow: `New issue
-  -> search similar past incidents
+  -> persist alert + RCA to S3
+  -> (next) search similar past incidents
   -> recommend previous fix if relevant`,
     items: [
-      'Durable storage (replace in-memory store)',
-      'Shared state between worker and API server',
-      'Embedding or keyword similarity over past RCAs',
-      'Surface "similar incident" matches in diagnosis',
+      'S3 alert + RCA JSON store (shipped)',
+      'Shared state between worker and API server via S3',
+      'Embedding or keyword similarity over past RCAs (next)',
+      'Surface "similar incident" matches in diagnosis (next)',
     ],
   },
   {

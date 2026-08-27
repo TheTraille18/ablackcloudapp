@@ -36,7 +36,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       w: 400,
       h: 118,
       label: 'Worker + Detector',
-      lines: ['Poll every 30s', 'CrashLoopBackOff', 'ImagePullBackOff', 'PodFailed rules'],
+      lines: ['Poll every 30s', 'CrashLoopBackOff', 'ImagePullBackOff', 'PendingTooLong + PodFailed'],
       fill: 'rgba(255,90,95,0.35)',
     },
     {
@@ -44,8 +44,8 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       y: 426,
       w: 480,
       h: 118,
-      label: 'Go Agent Orchestrator',
-      lines: ['Planner (rule-based)', 'Tool Runner', 'Incident State', 'Single Bedrock RCA'],
+      label: 'Go Agent Graph',
+      lines: ['Nodes + conditional edges', 'MCP tools', 'Incident State', 'Single Bedrock RCA'],
       fill: 'rgba(255,90,95,0.25)',
     },
     {
@@ -54,7 +54,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       w: 240,
       h: 100,
       label: 'Kubernetes Tools',
-      lines: ['DescribePod', 'GetPodLogs', 'ListEvents'],
+      lines: ['MCP: DescribePod', 'GetPodLogs', 'ListEvents'],
       fill: 'rgba(0,0,0,0.45)',
     },
     {
@@ -89,7 +89,7 @@ export const kubesentryDiagram: ArchitectureDiagramConfig = {
       y: 978,
       w: 640,
       h: 56,
-      label: 'HTTP API + Alert Store ? Slack / Jira / Dashboard (planned)',
+      label: 'HTTP API + S3 Alert Store · Slack / Jira / Dashboard (planned)',
       fill: 'rgba(0,166,153,0.25)',
     },
     {
