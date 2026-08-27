@@ -215,8 +215,18 @@ export const resumeHotspots: ResumeHotspot[] = [
     match: 'KubeSentry AI',
     title: 'KubeSentry AI',
     detail:
-      'KubeSentry AI is a personal project building an AI-powered Kubernetes incident response platform in Go. Phase 1 is complete: a worker polls the cluster every 30 seconds, a rule-based detector flags unhealthy pods (CrashLoopBackOff, ImagePullBackOff, PodFailed, and related states), and a Go agent orchestrator gathers evidence before calling Claude on Amazon Bedrock once per incident.\n\nThe agent follows a lightweight LangGraph-style pattern in Go — shared State, a Planner that selects tools by failure type, and a ToolRunner for DescribePod, GetPodLogs (with --previous fallback), and ListEvents. Root cause analysis is stored on each alert and exposed through an HTTP API alongside pod summaries. Development and testing use a local kind cluster with the Online Boutique demo workload.\n\nPlanned next phases include smarter describe-first planning, RAG-backed runbooks, structured diagnosis output, GitHub source tracing for stack traces, incident memory, and an investigation timeline UI. Portfolio: ablackcloudapp.com/apps/kubesentry-ai',
+      'KubeSentry AI is a personal project building an AI-powered Kubernetes incident response platform in Go. A worker polls the cluster, a rule-based detector flags unhealthy pods (CrashLoopBackOff, ImagePullBackOff, PodFailed, PendingTooLong, and related states), and a Go agent gathers evidence before calling Claude on Amazon Bedrock once per incident.\n\nThe agent runs as a LangGraph-style graph in Go — nodes, edges, and conditional routing — with Kubernetes tools exposed through MCP (DescribePod, GetPodLogs with --previous fallback, ListEvents). Alerts and RCA JSON persist to S3 and are served through an HTTP API. Development and testing use a local kind cluster with the Online Boutique demo workload.\n\nNext phases include describe-first planning and alert dedup, RAG-backed runbooks, structured diagnosis, GitHub source tracing, similar-incident memory, and an investigation timeline UI. Portfolio: ablackcloudapp.com/apps/kubesentry-ai',
     link: 'https://github.com/TheTraille18/kubeSentryAI',
+    linkLabel: 'View on GitHub',
+    expandThroughBullets: true,
+  },
+  {
+    id: 'careerpilot-ai',
+    match: 'CareerPilot',
+    title: 'CareerPilot AI',
+    detail:
+      'CareerPilot AI is a job-search assistant that imports Gmail job alerts (LinkedIn, Dice, Indeed, CareerBuilder, Remote Rocketship), tracks roles in a React dashboard, and tailors resumes with RAG + Claude on Amazon Bedrock. Job metadata lives in DynamoDB; job posts and tailored .docx files are stored in S3. FastAPI powers AI fit evaluation (including remote vs on-site), applied tracking, and admin/demo modes. Live: careerpilotai.ablackcloudapp.com · Portfolio: ablackcloudapp.com/apps/careerpilot-ai',
+    link: 'https://github.com/TheTraille18/careerPilotAI',
     linkLabel: 'View on GitHub',
     expandThroughBullets: true,
   },
