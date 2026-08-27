@@ -297,7 +297,6 @@ export default function ResumePdfViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const onErrorRef = useRef(onError);
   const onHotspotClickRef = useRef(onHotspotClick);
-  const pdfDataRef = useRef<ArrayBuffer | null>(null);
   const [loading, setLoading] = useState(true);
   const classes = useStyles();
 
@@ -315,21 +314,17 @@ export default function ResumePdfViewer({
       container.innerHTML = '';
 
       try {
-        if (!pdfDataRef.current) {
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-
-          const data = await response.arrayBuffer();
-          if (!isPdfBuffer(data)) {
-            throw new Error('Not a PDF file');
-          }
-
-          pdfDataRef.current = data;
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
         }
 
-        const pdf = await getDocument({ data: pdfDataRef.current }).promise;
+        const data = await response.arrayBuffer();
+        if (!isPdfBuffer(data)) {
+          throw new Error('Not a PDF file');
+        }
+
+        const pdf = await getDocument({ data }).promise;
 
         let containerWidth = container.clientWidth;
         if (containerWidth === 0) {
@@ -412,10 +407,6 @@ export default function ResumePdfViewer({
       }
     };
   }, [url, classes.pageCanvas, classes.pageWrap, classes.textLayer]);
-
-  useEffect(() => {
-    pdfDataRef.current = null;
-  }, [url]);
 
   return (
     <>

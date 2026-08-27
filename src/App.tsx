@@ -9,6 +9,7 @@ import TaskManagerPage from './components/TaskManagerPage';
 import Profile from './components/Profile';
 import RagSystem from './components/RagSystem';
 import KubeSentryAI from './components/KubeSentryAI';
+import CareerPilotAI from './components/CareerPilotAI';
 import Shopping4Chow from './components/Shopping4Chow';
 import HouseDetector from './components/HouseDetector';
 import AblackcloudApp from './components/AblackcloudApp';
@@ -33,6 +34,7 @@ function App() {
               <Route path="/apps/ablackcloudapp" component={AblackcloudApp} />
               <Route path="/apps/rag-system" component={RagSystem} />
               <Route path="/apps/kubesentry-ai" component={KubeSentryAI} />
+              <Route path="/apps/careerpilot-ai" component={CareerPilotAI} />
               <Route path="/apps/shopping-4-chow" component={Shopping4Chow} />
               <Route path="/apps/house-detector" component={HouseDetector} />
               <Route path="/taskmanagerapp">
@@ -43,6 +45,9 @@ function App() {
               </Route>
               <Route path="/kubesentry">
                 <Redirect to="/apps/kubesentry-ai" />
+              </Route>
+              <Route path="/careerpilot">
+                <Redirect to="/apps/careerpilot-ai" />
               </Route>
               <Route path="/shopping4chow">
                 <Redirect to="/apps/shopping-4-chow" />

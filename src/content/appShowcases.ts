@@ -52,6 +52,12 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
     ],
     progressUpdates: [
       {
+        date: 'Aug 20, 2026',
+        title: 'CareerPilot AI + KubeSentry updates',
+        detail:
+          'Added CareerPilot AI to the app catalog and showcase (live at careerpilotai.ablackcloudapp.com). Updated KubeSentry AI docs for LangGraph-style graph nodes, MCP tool integration, S3 alert persistence, and PendingTooLong detection.',
+      },
+      {
         date: 'Jul 6, 2026',
         title: 'KubeSentry roadmap layout + showcase polish',
         detail:
@@ -231,22 +237,44 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
       'AI-driven Kubernetes incident response — observability, agents, and chaos engineering in one platform.',
     githubUrl: 'https://github.com/TheTraille18/kubeSentryAI',
     summary: [
-      'KubeSentry AI is an alert-driven Kubernetes incident response platform. Phase 1 is complete: a Go worker polls the cluster every 30 seconds, a rule-based detector flags unhealthy pods (CrashLoopBackOff, ImagePullBackOff, PodFailed, and more), and a Go agent orchestrator gathers evidence before calling Claude on Amazon Bedrock once per incident.',
-      'The agent uses a lightweight LangGraph-style layout in Go — shared State, a Planner that picks tools by failure type, and a ToolRunner for DescribePod, GetPodLogs (with --previous fallback), and ListEvents. Root cause analysis is stored on each alert and served through an HTTP API alongside pod summaries.',
-      'The left-column roadmap outlines Phases 2–8: smarter planning, RAG runbooks, structured diagnosis, GitHub source tracing, incident memory, an investigation timeline UI, and advanced features like Prometheus metrics, Slack notifications, and chaos validation.',
+      'KubeSentry AI is an alert-driven Kubernetes incident response platform. A Go worker polls the cluster, a rule-based detector flags unhealthy pods (CrashLoopBackOff, ImagePullBackOff, PodFailed, PendingTooLong, and more), and a Go agent gathers evidence before calling Claude on Amazon Bedrock once per incident.',
+      'The agent now runs as a LangGraph-style graph in Go — nodes, edges, and conditional routing — instead of a flat step list. Kubernetes tools can be exposed through an MCP server so the agent calls describe/logs/events via MCP. Alerts and RCA JSON persist to S3 so the API and worker share durable state.',
+      'The left-column roadmap tracks Phases 2–8: smarter planning (in progress), RAG runbooks, structured diagnosis, GitHub source tracing, incident memory, an investigation timeline UI, and advanced features like Prometheus metrics, Slack notifications, and chaos validation.',
     ],
     architectureCaption:
-      'The worker polls the Kubernetes API via client-go, and the detector turns unhealthy pod states into alerts. A Go agent orchestrator — with a rule-based planner, evidence-gathering tools (describe pod, logs, events), and a single Claude call on Amazon Bedrock — produces root cause analysis stored on each alert. An HTTP API serves alerts and pod summaries. Prometheus, CloudWatch, notification channels (Slack, Jira), and a chaos validation pipeline are planned next.',
+      'The worker polls the Kubernetes API via client-go, and the detector turns unhealthy pod states into alerts. A Go agent graph — planner/route nodes, MCP-backed tools (describe pod, logs, events), and a single Claude call on Amazon Bedrock — produces root cause analysis stored on each alert in S3. An HTTP API serves alerts and pod summaries. Prometheus, CloudWatch, notification channels (Slack, Jira), and a chaos validation pipeline are planned next.',
     diagram: kubesentryDiagram,
     roadmapPhases: kubesentryPhases,
     toolsUsed: [
       { category: 'Platform', tools: ['Kubernetes', 'kind', 'EKS', 'Helm', 'Online Boutique'] },
-      { category: 'AI', tools: ['Go Agent Orchestrator', 'Rule-based Planner', 'Claude', 'Amazon Bedrock'] },
-      { category: 'Backend', tools: ['Go', 'client-go', 'Worker + Server binaries'] },
+      {
+        category: 'AI',
+        tools: ['Go Agent Graph', 'MCP Tools', 'Claude', 'Amazon Bedrock'],
+      },
+      { category: 'Backend', tools: ['Go', 'client-go', 'Worker + Server', 'MCP server'] },
       { category: 'Kubernetes Tools', tools: ['DescribePod', 'GetPodLogs', 'ListEvents'] },
-      { category: 'Planned', tools: ['Alert dedup', 'Shared storage', 'Slack / Jira', 'LitmusChaos', 'Chaos Mesh'] },
+      { category: 'Storage', tools: ['S3 alert + RCA JSON'] },
+      { category: 'Planned', tools: ['Alert dedup', 'RAG runbooks', 'Slack / Jira', 'LitmusChaos', 'Chaos Mesh'] },
     ],
     progressUpdates: [
+      {
+        date: 'Aug 7, 2026',
+        title: 'S3 alert persistence + PendingTooLong',
+        detail:
+          'Replaced the in-memory-only alert path with an S3 repository so alerts and RCA JSON survive restarts (s3://kubesentry-ai/alerts/<ns>/<pod>/<id>.json). Extended the detector to flag pods stuck Pending too long, and updated the README with bucket env vars and API examples.',
+      },
+      {
+        date: 'Jul 20, 2026',
+        title: 'MCP tool integration',
+        detail:
+          'Added an MCP server/client so Kubernetes investigation tools (describe, logs, events) can be invoked through the Model Context Protocol. Wired MCP into the agent tool runner and added a cmd/mcp entrypoint for local use alongside the worker and API.',
+      },
+      {
+        date: 'Jul 11, 2026',
+        title: 'LangGraph-style agent graph',
+        detail:
+          'Refactored the orchestrator from a linear steps/plan flow into an explicit graph: nodes, edges, conditional routing, and shared state — matching a LangGraph-style layout in Go. Updated architecture docs to describe the new control flow.',
+      },
       {
         date: 'Jul 6, 2026',
         title: 'Roadmap phases reorganized',
@@ -275,6 +303,93 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
         date: 'Jun 2026',
         title: 'Project page',
         detail: 'Added showcase documentation with architecture overview and planned tooling.',
+      },
+    ],
+  },
+
+  'careerpilot-ai': {
+    title: 'CareerPilot AI',
+    tagline:
+      'Job alert tracking and resume tailoring — Gmail import, RAG, and Amazon Bedrock in one workflow.',
+    githubUrl: 'https://github.com/TheTraille18/careerPilotAI',
+    githubLabel: 'App repo',
+    githubSecondaryUrl: 'https://careerpilotai.ablackcloudapp.com',
+    githubSecondaryLabel: 'Live app',
+    summary: [
+      'CareerPilot AI helps manage a job search end to end: import roles from Gmail job alerts (LinkedIn, Dice, Indeed, CareerBuilder, Remote Rocketship), track them in a React dashboard, and tailor resumes to each posting with RAG + Claude on Amazon Bedrock.',
+      'Job metadata lives in DynamoDB; job posts and tailored .docx resumes are stored in S3. A FastAPI backend serves the UI, runs AI evaluation (including remote vs on-site fit), and supports admin/demo modes for safer demos.',
+    ],
+    architectureCaption:
+      'Gmail label import writes job metadata to DynamoDB. The React UI talks to FastAPI for listing, filtering, applied tracking, and resume actions. Job descriptions and tailored resumes are stored in S3. ChromaDB holds resume knowledge for RAG; Amazon Bedrock (Titan embeddings + Claude) generates tailored resume content.',
+    diagram: {
+      viewBox: '0 0 760 420',
+      boxes: [
+        { x: 40, y: 30, w: 180, h: 52, label: 'Gmail alerts', sublabel: 'Job labels', fill: 'rgba(0,0,0,0.45)' },
+        { x: 280, y: 30, w: 200, h: 52, label: 'Import / parse', sublabel: 'gmail.py', fill: 'rgba(255,90,95,0.35)' },
+        { x: 540, y: 30, w: 180, h: 52, label: 'DynamoDB', sublabel: 'Job metadata', fill: 'rgba(0,166,153,0.35)' },
+        { x: 40, y: 150, w: 180, h: 52, label: 'React UI', sublabel: 'Jobs dashboard', fill: 'rgba(0,166,153,0.35)' },
+        { x: 280, y: 150, w: 200, h: 52, label: 'FastAPI', sublabel: 'API + eval', fill: 'rgba(255,90,95,0.35)' },
+        { x: 540, y: 150, w: 180, h: 52, label: 'S3', sublabel: 'Posts + resumes', fill: 'rgba(0,166,153,0.25)' },
+        { x: 160, y: 280, w: 200, h: 52, label: 'ChromaDB', sublabel: 'Resume RAG', fill: 'rgba(0,0,0,0.45)' },
+        { x: 420, y: 280, w: 220, h: 52, label: 'Amazon Bedrock', sublabel: 'Titan + Claude', fill: 'rgba(255,90,95,0.25)' },
+        { x: 280, y: 360, w: 200, h: 40, label: 'Tailored .docx', sublabel: '', fill: 'rgba(0,166,153,0.25)' },
+      ],
+      arrows: [
+        { x1: 220, y1: 56, x2: 278, y2: 56 },
+        { x1: 480, y1: 56, x2: 538, y2: 56 },
+        { x1: 220, y1: 176, x2: 278, y2: 176 },
+        { x1: 480, y1: 176, x2: 538, y2: 176 },
+        { x1: 380, y1: 56, x2: 380, y2: 148 },
+        { x1: 380, y1: 202, x2: 260, y2: 278 },
+        { x1: 420, y1: 202, x2: 500, y2: 278 },
+        { x1: 360, y1: 306, x2: 420, y2: 306 },
+        { x1: 530, y1: 332, x2: 420, y2: 358 },
+      ],
+      footer: 'Gmail → DynamoDB/S3 → RAG + Bedrock resume tailoring',
+    },
+    toolsUsed: [
+      { category: 'Frontend', tools: ['React', 'TypeScript', 'Vite'] },
+      { category: 'Backend', tools: ['Python', 'FastAPI'] },
+      { category: 'AWS', tools: ['DynamoDB', 'S3', 'Bedrock', 'CloudFront'] },
+      { category: 'AI', tools: ['RAG', 'ChromaDB', 'Claude', 'Titan Embeddings'] },
+      { category: 'Integrations', tools: ['Gmail API', 'LinkedIn / Dice / Indeed alerts'] },
+    ],
+    progressUpdates: [
+      {
+        date: 'Aug 18, 2026',
+        title: 'Remote vs on-site AI evaluation',
+        detail:
+          'Updated Gmail import args and Bedrock prompts so job fit evaluation accounts for remote versus on-site requirements when scoring roles.',
+      },
+      {
+        date: 'Aug 14, 2026',
+        title: 'Filter retention',
+        detail:
+          'Dashboard filters now retain across sessions so recurring job-search workflows stay intact.',
+      },
+      {
+        date: 'Aug 14, 2026',
+        title: 'S3 base resume + CORS downloads',
+        detail:
+          'Load the base resume from S3 and expose download filenames with CORS so the UI can fetch tailored resumes reliably from the browser.',
+      },
+      {
+        date: 'Aug 13, 2026',
+        title: 'Admin + demo modes',
+        detail:
+          'Added admin and demo modes for safer live demos, plus deployment updates for the hosted CareerPilot frontend.',
+      },
+      {
+        date: 'Aug 7, 2026',
+        title: 'AI eval + applied tracking',
+        detail:
+          'Expanded the job workflow with cover-letter support, URL fetch for job posts, applied-status tracking, and AI evaluation of role fit (merged Aug 9).',
+      },
+      {
+        date: 'Jul 15, 2026',
+        title: 'MVP: Gmail import + RAG resume tailoring',
+        detail:
+          'Shipped the core loop: parse Gmail job alerts into DynamoDB, manage jobs in a React UI, store posts in S3, and tailor resumes with ChromaDB RAG + Claude on Bedrock.',
       },
     ],
   },

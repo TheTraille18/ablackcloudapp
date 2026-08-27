@@ -2,6 +2,12 @@ import { ProgressUpdate } from '../types/appShowcase';
 
 export const resumeUpdates: ProgressUpdate[] = [
   {
+    date: 'Aug 20, 2026',
+    title: 'CareerPilot AI + KubeSentry portfolio updates',
+    detail:
+      'Added CareerPilot AI to the app catalog and showcase (live app link). Updated KubeSentry AI summary, roadmap, and progress for graph-based agents, MCP tools, S3 alert persistence, and PendingTooLong detection.',
+  },
+  {
     date: 'Jul 6, 2026',
     title: 'Resume PDF update + interactive hotspots',
     detail:
