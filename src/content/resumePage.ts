@@ -2,6 +2,12 @@ import { ProgressUpdate } from '../types/appShowcase';
 
 export const resumeUpdates: ProgressUpdate[] = [
   {
+    date: 'Aug 31, 2026',
+    title: 'MCP Platform + grocery-mcp + gmail-mcp',
+    detail:
+      'Added three AI apps to the catalog: shared MCP ECS Fargate platform, grocery-mcp (Kroger tools), and gmail-mcp (Gmail tools), each with showcase pages and live ALB links. Added github-mcp as Planned for GitHub Project board tools.',
+  },
+  {
     date: 'Aug 20, 2026',
     title: 'CareerPilot AI + KubeSentry portfolio updates',
     detail:

@@ -105,9 +105,16 @@ export default function AppRender({ image }: AppRenderProps) {
       <div className={classes.body}>
         <Typography className={classes.title}>{image.title}</Typography>
         <Typography className={classes.subtitle}>{description}</Typography>
-        <Typography className={classes.price}>
-          <strong>Free</strong> · open to use
-        </Typography>
+        {image.path === '/apps/ablackcloudapp' && (
+          <Typography className={classes.price}>
+            <strong>Free</strong> · open to use
+          </Typography>
+        )}
+        {image.path === '/apps/careerpilot-ai' && (
+          <Typography className={classes.price}>
+            <strong>Demo</strong> · available
+          </Typography>
+        )}
       </div>
     </>
   );
