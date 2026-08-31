@@ -52,6 +52,12 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
     ],
     progressUpdates: [
       {
+        date: 'Aug 31, 2026',
+        title: 'MCP Platform + grocery-mcp + gmail-mcp',
+        detail:
+          'Added three AI catalog entries for the shared MCP ECS Fargate platform and two live Streamable HTTP servers (Kroger grocery tools and Gmail tools), with showcase pages, routes, and hero images. Added github-mcp as Planned for GitHub Issues + Project board tools.',
+      },
+      {
         date: 'Aug 20, 2026',
         title: 'CareerPilot AI + KubeSentry updates',
         detail:
@@ -390,6 +396,331 @@ export const appShowcases: Record<string, AppShowcaseContent> = {
         title: 'MVP: Gmail import + RAG resume tailoring',
         detail:
           'Shipped the core loop: parse Gmail job alerts into DynamoDB, manage jobs in a React UI, store posts in S3, and tailor resumes with ChromaDB RAG + Claude on Bedrock.',
+      },
+    ],
+  },
+
+  'mcp-platform': {
+    title: 'MCP Platform',
+    tagline:
+      'Shared ECS Fargate + ALB for Model Context Protocol servers — path routing, secrets, and Cursor Streamable HTTP.',
+    githubUrl: 'https://github.com/TheTraille18/mcp-infa',
+    githubLabel: 'Infrastructure repo',
+    githubSecondaryUrl: 'http://mcp-prod-alb-1828811810.us-east-1.elb.amazonaws.com/mcp',
+    githubSecondaryLabel: 'Live ALB (/mcp)',
+    summary: [
+      'MCP Platform is a shared AWS runtime for multiple MCP HTTP servers. One ECS Fargate cluster and Application Load Balancer host path-routed services (grocery default /mcp, Gmail /gmail/mcp) so Cursor and other clients can call tools over Streamable HTTP with Bearer auth.',
+      'Each service has its own target group, security group, task definition, ECR image, and Secrets Manager secret. Infrastructure is managed with Terraform (HCP Terraform workspace); containers roll out via new task definition revisions and ECR pushes.',
+    ],
+    architectureCaption:
+      'Cursor (or any MCP client) hits the shared ALB. Listener rules route by path to grocery-mcp or gmail-mcp target groups. Fargate tasks pull images from ECR, inject runtime secrets from Secrets Manager, and expose Streamable HTTP MCP endpoints. CloudWatch Logs capture container output; IAM execution roles limit AWS access.',
+    diagram: {
+      viewBox: '0 0 760 400',
+      boxes: [
+        { x: 290, y: 20, w: 180, h: 52, label: 'Cursor', sublabel: 'MCP client', fill: 'rgba(0,0,0,0.45)' },
+        { x: 280, y: 110, w: 200, h: 52, label: 'ALB', sublabel: 'Path routing', fill: 'rgba(255,90,95,0.35)' },
+        { x: 40, y: 230, w: 200, h: 52, label: 'grocery-mcp', sublabel: '/mcp', fill: 'rgba(0,166,153,0.35)' },
+        { x: 280, y: 230, w: 200, h: 52, label: 'gmail-mcp', sublabel: '/gmail/mcp', fill: 'rgba(0,166,153,0.35)' },
+        { x: 520, y: 230, w: 200, h: 52, label: 'ECS Fargate', sublabel: 'cluster: mcp', fill: 'rgba(0,0,0,0.45)' },
+        { x: 40, y: 330, w: 200, h: 48, label: 'ECR', sublabel: 'Images', fill: 'rgba(0,0,0,0.35)' },
+        { x: 280, y: 330, w: 200, h: 48, label: 'Secrets Manager', sublabel: 'Runtime secrets', fill: 'rgba(255,90,95,0.25)' },
+        { x: 520, y: 330, w: 200, h: 48, label: 'CloudWatch', sublabel: 'Logs', fill: 'rgba(0,166,153,0.25)' },
+      ],
+      arrows: [
+        { x1: 380, y1: 72, x2: 380, y2: 108 },
+        { x1: 320, y1: 162, x2: 160, y2: 228 },
+        { x1: 380, y1: 162, x2: 380, y2: 228 },
+        { x1: 440, y1: 162, x2: 580, y2: 228 },
+        { x1: 140, y1: 282, x2: 140, y2: 328 },
+        { x1: 380, y1: 282, x2: 380, y2: 328 },
+        { x1: 580, y1: 282, x2: 580, y2: 328 },
+      ],
+      footer: 'Shared ALB → path rules → per-service Fargate tasks (ECR + Secrets + Logs)',
+    },
+    toolsUsed: [
+      { category: 'Compute', tools: ['ECS Fargate', 'Application Load Balancer', 'Target groups'] },
+      { category: 'AWS', tools: ['ECR', 'Secrets Manager', 'CloudWatch Logs', 'IAM'] },
+      { category: 'IaC', tools: ['Terraform', 'HCP Terraform'] },
+      { category: 'Protocol', tools: ['MCP', 'Streamable HTTP', 'Bearer auth'] },
+    ],
+    progressUpdates: [
+      {
+        date: 'Aug 2026',
+        title: 'gmail-mcp on shared ALB',
+        detail:
+          'Added a Gmail Fargate service with path rule /gmail/*, dedicated target group and security group, and Secrets Manager runtime config for OAuth + API token.',
+      },
+      {
+        date: 'Aug 2026',
+        title: 'grocery-mcp default /mcp',
+        detail:
+          'Deployed grocery-mcp as the default MCP path on the shared ALB with Streamable HTTP GET/DELETE 405 handling for Cursor clients.',
+      },
+      {
+        date: 'Aug 2026',
+        title: 'Platform foundation',
+        detail:
+          'Stood up the mcp ECS cluster, shared ALB, ECR repos, IAM roles, and Terraform workspace for multi-service MCP hosting.',
+      },
+    ],
+  },
+
+  'grocery-mcp': {
+    title: 'grocery-mcp',
+    tagline:
+      'Kroger store and product MCP tools — TypeScript Streamable HTTP on Fargate for Cursor.',
+    githubUrl: 'https://github.com/TheTraille18/grocery-mcp',
+    githubLabel: 'App repo',
+    githubSecondaryUrl: 'http://mcp-prod-alb-1828811810.us-east-1.elb.amazonaws.com/mcp',
+    githubSecondaryLabel: 'Live MCP (/mcp)',
+    summary: [
+      'grocery-mcp is a TypeScript Model Context Protocol server that wraps the Kroger Public API so agents in Cursor can find nearby stores and search products by location.',
+      'It runs locally over stdio and in AWS as a Streamable HTTP container on the shared MCP Fargate platform. Runtime secrets (MCP Bearer token, Kroger client credentials) come from Secrets Manager; GitHub Actions OIDC pushes images to ECR and rolls the ECS service.',
+    ],
+    architectureCaption:
+      'Cursor calls the MCP endpoint on the shared ALB (/mcp). The grocery-mcp Fargate task authenticates the Bearer token, talks to Kroger OAuth + Products/Locations APIs, and returns tool results. Deployments rebuild the Docker image, push to ECR, and update the ECS task definition.',
+    diagram: {
+      viewBox: '0 0 760 380',
+      boxes: [
+        { x: 40, y: 40, w: 180, h: 52, label: 'Cursor', sublabel: 'MCP client', fill: 'rgba(0,0,0,0.45)' },
+        { x: 280, y: 40, w: 200, h: 52, label: 'ALB /mcp', sublabel: 'Streamable HTTP', fill: 'rgba(255,90,95,0.35)' },
+        { x: 540, y: 40, w: 180, h: 52, label: 'grocery-mcp', sublabel: 'Fargate task', fill: 'rgba(0,166,153,0.35)' },
+        { x: 280, y: 170, w: 200, h: 52, label: 'Secrets Manager', sublabel: 'Token + Kroger', fill: 'rgba(0,0,0,0.45)' },
+        { x: 540, y: 170, w: 180, h: 52, label: 'Kroger API', sublabel: 'OAuth + products', fill: 'rgba(255,90,95,0.25)' },
+        { x: 40, y: 300, w: 200, h: 52, label: 'GitHub Actions', sublabel: 'OIDC deploy', fill: 'rgba(0,0,0,0.35)' },
+        { x: 280, y: 300, w: 200, h: 52, label: 'ECR', sublabel: 'grocery-mcp', fill: 'rgba(0,166,153,0.25)' },
+        { x: 540, y: 300, w: 180, h: 52, label: 'ECS service', sublabel: 'Rollout', fill: 'rgba(0,166,153,0.25)' },
+      ],
+      arrows: [
+        { x1: 220, y1: 66, x2: 278, y2: 66 },
+        { x1: 480, y1: 66, x2: 538, y2: 66 },
+        { x1: 630, y1: 92, x2: 630, y2: 168 },
+        { x1: 540, y1: 196, x2: 480, y2: 196 },
+        { x1: 240, y1: 326, x2: 278, y2: 326 },
+        { x1: 480, y1: 326, x2: 538, y2: 326 },
+        { x1: 630, y1: 300, x2: 630, y2: 92 },
+      ],
+      footer: 'Cursor → ALB /mcp → grocery-mcp → Kroger · CI: Actions → ECR → ECS',
+    },
+    toolsUsed: [
+      { category: 'MCP', tools: ['@modelcontextprotocol/sdk', 'Streamable HTTP', 'stdio', 'find_stores', 'set_store', 'search_products'] },
+      { category: 'Language', tools: ['TypeScript', 'Node.js', 'Zod'] },
+      { category: 'Integrations', tools: ['Kroger Public API', 'OAuth client credentials'] },
+      { category: 'AWS', tools: ['ECS Fargate', 'ECR', 'Secrets Manager', 'ALB'] },
+      { category: 'DevOps', tools: ['Docker', 'GitHub Actions OIDC'] },
+    ],
+    progressUpdates: [
+      {
+        date: 'Aug 2026',
+        title: 'Fargate + Cursor HTTP',
+        detail:
+          'Containerized Streamable HTTP with host binding for Fargate, ALB path routing, and GET/DELETE 405 responses required by Cursor’s MCP transport.',
+      },
+      {
+        date: 'Aug 2026',
+        title: 'OIDC deploy pipeline',
+        detail:
+          'GitHub Actions assumes an IAM role via OIDC, builds/pushes ECR, and updates the ECS service for grocery-mcp.',
+      },
+      {
+        date: 'Aug 2026',
+        title: 'Kroger MCP tools',
+        detail:
+          'Shipped TypeScript MCP tools for nearby store lookup and product search against the Kroger Public API.',
+      },
+    ],
+  },
+
+  'gmail-mcp': {
+    title: 'gmail-mcp',
+    tagline:
+      'Gmail search, read, and label tools over MCP — Go stdio locally, Streamable HTTP on Fargate.',
+    githubUrl: 'https://github.com/TheTraille18/gmail-mcp',
+    githubLabel: 'App repo',
+    githubSecondaryUrl: 'http://mcp-prod-alb-1828811810.us-east-1.elb.amazonaws.com/gmail/mcp',
+    githubSecondaryLabel: 'Live MCP (/gmail/mcp)',
+    summary: [
+      'gmail-mcp is a Go MCP server that exposes Gmail tools to agents: ping, search_gmail, get_gmail, list_labels, and apply_label. Local Cursor uses the stdio binary; AWS serves the same tools over Streamable HTTP behind the shared MCP ALB at /gmail/mcp.',
+      'OAuth client credentials and refresh token are injected from Secrets Manager as JSON env vars and written to /tmp at startup for the Gmail client. Multi-stage Docker builds produce a small Alpine image pushed to ECR.',
+    ],
+    architectureCaption:
+      'Cursor authenticates with a Bearer token on the ALB path /gmail/mcp. The gmail-mcp Fargate task runs the HTTP MCP server, uses Secrets Manager-backed Google credentials, and calls the Gmail API. A separate stdio entrypoint supports the same tools without HTTP for local development.',
+    diagram: {
+      viewBox: '0 0 760 400',
+      boxes: [
+        { x: 40, y: 30, w: 180, h: 52, label: 'Cursor', sublabel: 'MCP client', fill: 'rgba(0,0,0,0.45)' },
+        { x: 280, y: 30, w: 220, h: 52, label: 'ALB /gmail/mcp', sublabel: 'Streamable HTTP', fill: 'rgba(255,90,95,0.35)' },
+        { x: 560, y: 30, w: 160, h: 52, label: 'gmail-mcp', sublabel: 'Go · Fargate', fill: 'rgba(0,166,153,0.35)' },
+        { x: 280, y: 150, w: 220, h: 52, label: 'Secrets Manager', sublabel: 'OAuth + API token', fill: 'rgba(0,0,0,0.45)' },
+        { x: 560, y: 150, w: 160, h: 52, label: 'Gmail API', sublabel: 'Search / labels', fill: 'rgba(255,90,95,0.25)' },
+        { x: 40, y: 270, w: 180, h: 52, label: 'cmd/server', sublabel: 'Local stdio', fill: 'rgba(0,166,153,0.25)' },
+        { x: 280, y: 270, w: 220, h: 52, label: 'cmd/http', sublabel: 'Bearer + /mcp', fill: 'rgba(0,166,153,0.35)' },
+        { x: 560, y: 270, w: 160, h: 52, label: 'ECR', sublabel: 'Alpine image', fill: 'rgba(0,0,0,0.35)' },
+        { x: 280, y: 350, w: 220, h: 40, label: 'Tools', sublabel: 'search · get · labels', fill: 'rgba(0,0,0,0.35)' },
+      ],
+      arrows: [
+        { x1: 220, y1: 56, x2: 278, y2: 56 },
+        { x1: 500, y1: 56, x2: 558, y2: 56 },
+        { x1: 640, y1: 82, x2: 640, y2: 148 },
+        { x1: 560, y1: 176, x2: 500, y2: 176 },
+        { x1: 390, y1: 82, x2: 390, y2: 148 },
+        { x1: 130, y1: 270, x2: 130, y2: 82 },
+        { x1: 390, y1: 270, x2: 390, y2: 202 },
+        { x1: 640, y1: 270, x2: 640, y2: 82 },
+        { x1: 390, y1: 322, x2: 390, y2: 348 },
+      ],
+      footer: 'stdio or ALB /gmail/mcp → gmail-mcp → Gmail API (Secrets Manager credentials)',
+    },
+    toolsUsed: [
+      { category: 'MCP', tools: ['mcp-go', 'Streamable HTTP', 'stdio', 'ping', 'search_gmail', 'get_gmail', 'list_labels', 'apply_label'] },
+      { category: 'Language', tools: ['Go'] },
+      { category: 'Integrations', tools: ['Gmail API', 'OAuth 2.0'] },
+      { category: 'AWS', tools: ['ECS Fargate', 'ECR', 'Secrets Manager', 'ALB'] },
+      { category: 'DevOps', tools: ['Docker multi-stage', 'AWS CLI deploy'] },
+    ],
+    progressUpdates: [
+      {
+        date: 'Aug 2026',
+        title: 'HTTP on Fargate',
+        detail:
+          'Added cmd/http with Bearer auth, /mcp and /gmail/mcp routes, Secrets Manager JSON → /tmp credential files, and ECS service behind ALB /gmail/*.',
+      },
+      {
+        date: 'Aug 2026',
+        title: 'Split from ai-assistant',
+        detail:
+          'Carved Gmail MCP tools into a dedicated gmail-mcp Go module with stdio and HTTP entrypoints for Cursor and AWS.',
+      },
+      {
+        date: 'Aug 2026',
+        title: 'Gmail tool set',
+        detail:
+          'Implemented search, message fetch, label list, and apply_label tools against the Gmail API.',
+      },
+    ],
+  },
+
+  'github-mcp': {
+    title: 'github-mcp',
+    tagline:
+      'Manage GitHub Issues and Project boards from AI tools — create tickets and move cards via MCP.',
+    githubUrl: 'https://github.com/TheTraille18/github-mcp',
+    githubLabel: 'App repo (planned)',
+    workInProgress: true,
+    summary: [
+      'github-mcp will expose Model Context Protocol tools so AI assistants and other MCP-compatible clients can work your GitHub Project board: list items by column, open issues, add them to the board, and update Status (Todo → In Progress → Done).',
+      'First slice targets GitHub Issues + Projects (v2) with a fine-grained token or GitHub App. Same deploy path as other MCP servers later: stdio locally, Streamable HTTP on the shared ECS Fargate platform.',
+    ],
+    architectureCaption:
+      'Any MCP-compatible AI client calls github-mcp tools. The server uses the GitHub GraphQL/REST APIs to create issues, attach them to a Project, and set the Status field. Planned runtime secrets: GitHub token, owner, repo, and project number.',
+    diagram: {
+      viewBox: '0 0 760 360',
+      boxes: [
+        { x: 40, y: 40, w: 180, h: 52, label: 'AI tools', sublabel: 'MCP clients', fill: 'rgba(0,0,0,0.45)' },
+        { x: 280, y: 40, w: 200, h: 52, label: 'github-mcp', sublabel: 'Tools', fill: 'rgba(0,166,153,0.35)' },
+        { x: 540, y: 40, w: 180, h: 52, label: 'GitHub API', sublabel: 'Issues + Projects', fill: 'rgba(255,90,95,0.35)' },
+        { x: 160, y: 180, w: 200, h: 52, label: 'create_issue', sublabel: 'New ticket', fill: 'rgba(0,0,0,0.35)' },
+        { x: 400, y: 180, w: 200, h: 52, label: 'set_status', sublabel: 'Board column', fill: 'rgba(0,166,153,0.25)' },
+        { x: 280, y: 290, w: 200, h: 48, label: 'Project board', sublabel: 'Todo · Doing · Done', fill: 'rgba(255,90,95,0.25)' },
+      ],
+      arrows: [
+        { x1: 220, y1: 66, x2: 278, y2: 66 },
+        { x1: 480, y1: 66, x2: 538, y2: 66 },
+        { x1: 350, y1: 92, x2: 260, y2: 178 },
+        { x1: 410, y1: 92, x2: 480, y2: 178 },
+        { x1: 360, y1: 232, x2: 360, y2: 288 },
+        { x1: 500, y1: 232, x2: 400, y2: 288 },
+      ],
+      footer: 'Planned — AI tools → github-mcp → GitHub Issues + Project board',
+      workInProgress: true,
+    },
+    toolsUsed: [
+      { category: 'MCP (planned)', tools: ['list_project_items', 'create_issue', 'add_to_project', 'set_status'] },
+      { category: 'Integrations', tools: ['GitHub Issues', 'GitHub Projects v2', 'GraphQL / REST'] },
+      { category: 'Auth', tools: ['Fine-grained PAT or GitHub App'] },
+      { category: 'Platform (later)', tools: ['stdio', 'Streamable HTTP', 'ECS Fargate'] },
+    ],
+    progressUpdates: [
+      {
+        date: 'Aug 31, 2026',
+        title: 'Catalog entry',
+        detail:
+          'Added github-mcp to the app catalog as Planned: GitHub Issues + Project board management for MCP-compatible AI clients.',
+      },
+      {
+        date: 'Planned',
+        title: 'MVP board loop',
+        detail:
+          'Implement create_issue, add_to_project, list_project_items, and set_status against a real GitHub Project.',
+      },
+      {
+        date: 'Planned',
+        title: 'Deploy on MCP Platform',
+        detail:
+          'Containerize Streamable HTTP and route /github/mcp on the shared ALB once the stdio tools are solid.',
+      },
+    ],
+  },
+
+  'knowledge-mcp': {
+    title: 'knowledge-mcp',
+    tagline:
+      'Study-topic MCP — store topics in DynamoDB, list them from AI tools, and get quizzed on what you need to learn.',
+    githubUrl: 'https://github.com/TheTraille18/knowledge-mcp',
+    githubLabel: 'App repo (planned)',
+    workInProgress: true,
+    summary: [
+      'knowledge-mcp will keep a list of study topics (most likely in DynamoDB) and expose MCP tools so AI assistants and other MCP-compatible clients can list topics, add new ones, and quiz you on selected material.',
+      'The AI tool uses those results to run the study conversation; the server owns persistence and quiz prompts. Same later path as other MCP apps: stdio locally, Streamable HTTP on the shared Fargate platform.',
+    ],
+    architectureCaption:
+      'Any MCP-compatible AI client calls knowledge-mcp tools. Topics are read and written in DynamoDB. quiz_me returns questions or study prompts for one or more topics so the AI can test you in chat.',
+    diagram: {
+      viewBox: '0 0 760 360',
+      boxes: [
+        { x: 40, y: 40, w: 180, h: 52, label: 'AI tools', sublabel: 'MCP clients', fill: 'rgba(0,0,0,0.45)' },
+        { x: 280, y: 40, w: 200, h: 52, label: 'knowledge-mcp', sublabel: 'Tools', fill: 'rgba(0,166,153,0.35)' },
+        { x: 540, y: 40, w: 180, h: 52, label: 'DynamoDB', sublabel: 'Topics', fill: 'rgba(255,90,95,0.35)' },
+        { x: 100, y: 180, w: 160, h: 52, label: 'list_topics', sublabel: '', fill: 'rgba(0,0,0,0.35)' },
+        { x: 300, y: 180, w: 160, h: 52, label: 'add_topic', sublabel: '', fill: 'rgba(0,166,153,0.25)' },
+        { x: 500, y: 180, w: 160, h: 52, label: 'quiz_me', sublabel: 'Test prompts', fill: 'rgba(255,90,95,0.25)' },
+        { x: 280, y: 290, w: 200, h: 48, label: 'Study session', sublabel: 'AI quizzes you', fill: 'rgba(0,0,0,0.35)' },
+      ],
+      arrows: [
+        { x1: 220, y1: 66, x2: 278, y2: 66 },
+        { x1: 480, y1: 66, x2: 538, y2: 66 },
+        { x1: 340, y1: 92, x2: 180, y2: 178 },
+        { x1: 380, y1: 92, x2: 380, y2: 178 },
+        { x1: 420, y1: 92, x2: 560, y2: 178 },
+        { x1: 580, y1: 232, x2: 420, y2: 288 },
+      ],
+      footer: 'Planned — AI tools → knowledge-mcp → DynamoDB topics + quiz prompts',
+      workInProgress: true,
+    },
+    toolsUsed: [
+      { category: 'MCP (planned)', tools: ['list_topics', 'add_topic', 'get_topic', 'quiz_me'] },
+      { category: 'Data', tools: ['DynamoDB'] },
+      { category: 'AI workflow', tools: ['Topic list', 'Quiz prompts', 'MCP-compatible AI clients'] },
+      { category: 'Platform (later)', tools: ['stdio', 'Streamable HTTP', 'ECS Fargate'] },
+    ],
+    progressUpdates: [
+      {
+        date: 'Aug 31, 2026',
+        title: 'Catalog entry',
+        detail:
+          'Added knowledge-mcp to the app catalog as Planned: DynamoDB-backed study topics with list, add, and quiz tools for MCP-compatible AI clients.',
+      },
+      {
+        date: 'Planned',
+        title: 'Topic CRUD + quiz_me',
+        detail:
+          'Implement DynamoDB topic store and MCP tools to list, add, fetch, and generate quiz prompts.',
+      },
+      {
+        date: 'Planned',
+        title: 'Deploy on MCP Platform',
+        detail:
+          'Containerize Streamable HTTP and route /knowledge/mcp on the shared ALB once the stdio tools are solid.',
       },
     ],
   },

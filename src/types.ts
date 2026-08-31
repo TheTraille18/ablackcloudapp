@@ -42,7 +42,10 @@ export interface AppImage {
   width: string;
   path: string;
   badge?: string;
+  /** Primary catalog category. */
   group?: string;
+  /** Extra categories this app should appear under (in addition to group/badge). */
+  groups?: string[];
   status: AppStatus;
   infoLine1: string;
   infoLine2: string;
