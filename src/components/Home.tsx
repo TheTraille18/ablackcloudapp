@@ -10,7 +10,7 @@ import { airbnbColors } from '../theme/airbnbTheme';
 import { catalogApps, filterCatalogApps } from '../data/apps';
 import { useAppSearch } from '../hooks/useAppSearch';
 
-const categories = ['All apps', 'AI', 'Serverless', 'Tools'];
+const categories = ['All apps', 'AI', 'MCP', 'Serverless', 'Tools'];
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('All apps');
@@ -188,7 +188,7 @@ export default function Home() {
       </div>
 
       <Typography className={classes.sectionTitle} component="h2">
-        Live on Black Cloud →
+        Apps on Black Cloud →
       </Typography>
 
       <Grid container spacing={2} className={classes.grid} justify="center">

@@ -98,7 +98,7 @@ export const resumeHotspots: ResumeHotspot[] = [
           { name: 'Go', level: 7 },
           { name: '*Java', level: 5 },
           { name: 'SQL', level: 4 },
-          { name: '*JavaScript', level: 4 },
+          { name: '*TypeScript', level: 4 },
         ],
       },
       {
@@ -170,34 +170,34 @@ export const resumeHotspots: ResumeHotspot[] = [
   },
   {
     id: 'blackstone',
-    match: 'Blackstone |',
+    match: 'Blackstone',
     title: 'Blackstone',
     detail:
-      "As a member of Blackstone's Platform Engineering team, I supported Infrastructure as Code modernization initiatives focused on HCP Terraform. My responsibilities included onboarding existing AWS infrastructure and HCP Terraform platform configurations into Infrastructure as Code by leveraging Terraform imports and developing reusable Terraform configurations for ongoing management. This included importing HCP Terraform users, teams, and platform resources into Terraform so they could be managed through Git-based workflows instead of manual configuration through the HCP Terraform UI.\n\nThe Platform Engineering team supported multiple internal accounts, each with its own HCP Terraform configuration and infrastructure requirements. To streamline onboarding, I contributed to a React-based self-service platform that allowed users to request new HCP Terraform workspaces and account configurations. Users submitted information such as workspace names, Git repository details, and account-specific configuration requirements through the portal.\n\nTo support this workflow, I developed Python-based AWS Lambda functions that integrated with the HCP Terraform API to automate workspace lifecycle management. These services provided capabilities including creating workspaces, listing available workspaces, retrieving workspace details, and deleting workspaces through automated workflows exposed by the internal platform.\n\nOnce a workspace was provisioned, I utilized standardized Terraform module templates and account-specific configuration values to deploy and manage AWS infrastructure across development, test, and production environments in a consistent and repeatable manner.\n\nI also extended Python-based integrations with Terraform and Git platforms, resolved production issues, and improved the performance of automation workflows, including reducing the execution time of a legacy process from approximately 15 minutes to 1 minute.",
+      'As a Software Engineer Consultant on Blackstone’s Platform Engineering team (Atos Client: Blackstone, 01/2022 – 04/2023), I migrated Terraform Enterprise resources to HCP Terraform and imported AWS infrastructure, users, teams, and platform resources into Terraform-managed IaC.\n\nI built Jenkins CI/CD infrastructure as code with Terraform, and developed Python Lambda functions and API Gateway integrations with the HCP Terraform API to automate workspace lifecycle operations through a React self-service platform.\n\nI also optimized legacy automation workflows, reducing execution time from about 15 minutes to 1 minute.',
     expandThroughBullets: true,
   },
   {
     id: 'occ',
-    match: 'The Options Clearing Corporation |',
+    match: 'The Options Clearing Corporation',
     title: 'The Options Clearing Corporation (OCC)',
     detail:
-      'As a Software Engineer Consultant supporting The Options Clearing Corporation (OCC), I contributed to applications and infrastructure supporting critical financial market operations. My engagement evolved through two distinct phases, providing experience across software testing, application deployments, Kubernetes operations, and platform engineering.\n\nDuring the first phase, I worked closely with the testing team, where I was responsible for developing and maintaining automated test coverage for enterprise applications. This included creating and rewriting Java-based Cucumber test scenarios and supporting monthly application releases. I was also responsible for deploying application updates across multiple environments using Rancher, providing hands-on experience with Kubernetes-based release management.\n\nDuring the second phase, my responsibilities shifted toward DevOps and platform engineering activities. In addition to managing application deployments, I investigated and resolved production issues, analyzed application and container failures, supported Kubernetes cluster migrations, and assisted with infrastructure modernization efforts. As part of this work, I provisioned Kubernetes clusters and gained practical experience with cluster administration, application troubleshooting, Helm deployments, Rancher operations, and containerized workloads running in enterprise environments.\n\nThis engagement provided valuable experience supporting highly available systems within a regulated financial services environment while strengthening my expertise in Kubernetes operations, deployment automation, troubleshooting, and platform support.',
+      'As a Software Engineer Consultant supporting The Options Clearing Corporation (Atos Client: OCC, 06/2023 – 06/2024), I developed Java customer test frameworks and Python integration and unit tests.\n\nI managed monthly Amazon EKS deployments using Harness and Helm, and investigated production issues with Rancher, kubectl, Docker, and application logs — strengthening hands-on Kubernetes operations experience in a regulated financial services environment.',
     expandThroughBullets: true,
   },
   {
     id: 'capital-one',
-    match: 'Capital One |',
+    match: 'Capital One',
     title: 'Capital One',
     detail:
-      'As a Software Engineer Consultant supporting Capital One, I contributed to enterprise cloud modernization initiatives focused on AWS Aurora PostgreSQL and Infrastructure as Code. My primary responsibility was migrating multiple application platforms from a legacy internal Infrastructure as Code framework to a newer company-standard platform designed to support Aurora PostgreSQL deployments. The migration effort spanned six to seven application platforms, each consisting of development, test, and production environments supporting business-critical workloads.\n\nThe migration process involved significantly more than simply converting Infrastructure as Code. Existing environments utilized AWS Aurora PostgreSQL Global Clusters deployed across multiple AWS regions, and many environments operated on different PostgreSQL major versions. Because the new Infrastructure as Code platform only supported specific PostgreSQL versions, I was responsible for planning and executing database version upgrades while accounting for AWS Aurora PostgreSQL upgrade path restrictions. Development environments often required multiple sequential major version upgrades before reaching the target version, while production and test environments required careful coordination to maintain availability and minimize operational risk.\n\nFor Aurora Global Database environments, I helped execute controlled upgrade procedures that included upgrading secondary regions, performing database switchovers, upgrading former primary regions, and restoring the original topology. These activities required extensive validation, coordination with application owners, and careful execution to ensure business continuity. Because these databases supported live production workloads, every migration required formal change management processes, deployment approvals, and close collaboration with the teams responsible for the applications relying on the databases.\n\nAs the first engineer on the team to successfully complete a full migration across development, test, and production environments, I helped establish the migration approach, validation procedures, deployment sequencing, and operational practices that were later adopted by the broader team. While automated conversion tools were available, many database parameters and environment-specific configurations required manual validation and updates. I frequently compared generated Infrastructure as Code configurations against existing AWS environments to ensure accuracy and prevent unintended infrastructure changes.\n\nOnce database versions and configurations were aligned with platform requirements, I deployed the new Infrastructure as Code framework and validated that the generated infrastructure matched the existing Aurora configuration. This approach allowed resources to transition to the new platform without unnecessary recreation while maintaining existing behavior and operational characteristics.\n\nIn addition to infrastructure modernization efforts, I participated in technical debt remediation initiatives, audited Go package dependencies, and developed unit tests for Go-based services. This engagement strengthened my experience with AWS Aurora PostgreSQL, Global Database architectures, Infrastructure as Code migrations, production change management, database upgrade planning, stakeholder coordination, Go development, and large-scale enterprise cloud modernization projects.',
+      'As a Software Engineer Consultant supporting Capital One (Atos Client: Capital One, 11/2024 – 06/2025), I led the first successful migration of Aurora PostgreSQL Global Clusters from a legacy IaC platform, including required multi-stage major-version upgrades across development, test, and production.\n\nI validated Terraform configurations against existing AWS environments and coordinated production migrations through formal change management. I also audited Go dependencies, remediated technical debt, and developed Go unit tests.',
     expandThroughBullets: true,
   },
   {
     id: 'mayo-clinic',
-    match: 'Mayo Clinic |',
+    match: 'Mayo Clinic',
     title: 'Mayo Clinic',
     detail:
-      'As a Software Engineer Consultant supporting Mayo Clinic, I contributed to the development and modernization of a healthcare-focused platform utilizing React, GCP services, and Azure identity integrations. My primary responsibilities included developing a new user interface, implementing application enhancements, and supporting backend integrations within a cloud-native environment.\n\nA significant portion of my work involved integrating Azure App Registration-based authentication to support secure user access and identity management. I also worked with GCP services including BigQuery, Pub/Sub, and Artifact Registry while supporting application development and deployment activities across multiple environments.\n\nIn addition to feature development, I investigated and resolved CI/CD pipeline issues within Azure DevOps and assisted with application security remediation efforts, including addressing vulnerabilities related to third-party React package dependencies. I leveraged AI-assisted development tools such as Cursor to accelerate development, troubleshoot issues, and improve delivery efficiency.\n\nThis engagement provided experience working across multiple cloud platforms, combining frontend development, cloud services, identity integration, DevOps processes, and application security within a healthcare environment.',
+      'As a Software Engineer Consultant supporting Mayo Clinic (Atos Client: Mayo Clinic, 03/2026 – 05/2026), I developed React and TypeScript enhancements and implemented Azure App Registration authentication for a healthcare safety platform.\n\nI also resolved Azure DevOps CI/CD pipeline failures and remediated security vulnerabilities related to application dependencies.',
     expandThroughBullets: true,
   },
   {
@@ -225,8 +225,38 @@ export const resumeHotspots: ResumeHotspot[] = [
     match: 'CareerPilot',
     title: 'CareerPilot AI',
     detail:
-      'CareerPilot AI is a job-search assistant that imports Gmail job alerts (LinkedIn, Dice, Indeed, CareerBuilder, Remote Rocketship), tracks roles in a React dashboard, and tailors resumes with RAG + Claude on Amazon Bedrock. Job metadata lives in DynamoDB; job posts and tailored .docx files are stored in S3. FastAPI powers AI fit evaluation (including remote vs on-site), applied tracking, and admin/demo modes. Live: careerpilotai.ablackcloudapp.com · Portfolio: ablackcloudapp.com/apps/careerpilot-ai',
-    link: 'https://github.com/TheTraille18/careerPilotAI',
+      'Designed and developed CareerPilot AI, an AI-powered career optimization platform that tailors resumes and cover letters to specific job descriptions while preserving original DOCX formatting. Deployed on Amazon ECS Fargate with CI/CD via GitHub Actions.\n\nBuilt RAG workflows and FastAPI endpoints using Python, Amazon Bedrock, LangChain, ChromaDB, and Titan Embeddings for resume ingestion, retrieval, tailoring, and cover-letter generation. Built the React and TypeScript frontend with structured resume parsing, JSON knowledge schemas, and document-aware DOCX editing. Developed AI evaluations for factual consistency, ATS keyword coverage, response relevance, and tailoring quality.',
+    link: 'https://careerpilotai.ablackcloudapp.com',
+    linkLabel: 'Live app',
+    expandThroughBullets: true,
+  },
+  {
+    id: 'mcp-platform',
+    match: 'MCP Platform',
+    title: 'MCP Platform',
+    detail:
+      'Built a multi-service MCP platform on AWS using a shared ECS Fargate cluster and Application Load Balancer with path-based routing. Provisioned infrastructure through HCP Terraform and integrated ECR, Secrets Manager, CloudWatch, IAM, and GitHub Actions OIDC for secure container deployments.\n\nHosts multiple Streamable HTTP MCP servers (including Gmail and grocery tools) behind one ALB so Cursor and other agents can call tools over Bearer-authenticated endpoints.',
+    link: 'https://ablackcloudapp.com/apps/mcp-platform',
+    linkLabel: 'Portfolio page',
+    expandThroughBullets: true,
+  },
+  {
+    id: 'gmail-mcp',
+    match: 'Gmail MCP',
+    title: 'Gmail MCP',
+    detail:
+      'Developed a Go MCP server for searching and reading Gmail messages and managing labels through OAuth. Supports local stdio and remote Streamable HTTP access for AI assistants and other MCP-compatible clients. Deployed on the shared MCP Fargate platform at /gmail/mcp.',
+    link: 'https://github.com/TheTraille18/gmail-mcp',
+    linkLabel: 'View on GitHub',
+    expandThroughBullets: true,
+  },
+  {
+    id: 'grocery-mcp',
+    match: 'Grocery MCP',
+    title: 'Grocery MCP',
+    detail:
+      'Developed an extensible TypeScript MCP server for grocery store and product search, initially integrating Kroger APIs and designed to support additional retailers through a common MCP interface. Runs locally over stdio and remotely as Streamable HTTP on the shared MCP platform.',
+    link: 'https://github.com/TheTraille18/grocery-mcp',
     linkLabel: 'View on GitHub',
     expandThroughBullets: true,
   },

@@ -97,20 +97,48 @@ function groupTextIntoLines(items: PdfTextItem[]): LineGroup[] {
 }
 
 function isJobHeadingLine(text: string): boolean {
-  return /\|\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|\d{4})/i.test(
+  return /\|\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|\d{1,2}\/\d{4}|\d{4})/i.test(
     text
   );
 }
 
-function isHotspotBoundaryLine(text: string): boolean {
+function isHotspotBoundaryLine(text: string, hotspot?: ResumeHotspot): boolean {
   const normalized = text.trim().toLowerCase();
   if (normalized.includes('internal innovation initiative')) {
     return true;
   }
-  if (normalized === 'ai & cloud projects') {
+  if (normalized.includes('atos client:')) {
     return true;
   }
-  if (normalized.includes('kubesentry ai')) {
+  if (
+    normalized === 'ai & cloud projects' ||
+    normalized === 'ai engineering projects'
+  ) {
+    return true;
+  }
+  // Project titles/URLs are boundaries for *other* hotspots, not for their own section.
+  if (
+    normalized.includes('kubesentry') &&
+    hotspot?.id !== 'kubesentry-ai'
+  ) {
+    return true;
+  }
+  if (
+    normalized.includes('careerpilot') &&
+    hotspot?.id !== 'careerpilot-ai'
+  ) {
+    return true;
+  }
+  if (
+    normalized.includes('mcp platform') &&
+    hotspot?.id !== 'mcp-platform'
+  ) {
+    return true;
+  }
+  if (normalized.includes('gmail mcp') && hotspot?.id !== 'gmail-mcp') {
+    return true;
+  }
+  if (normalized.includes('grocery mcp') && hotspot?.id !== 'grocery-mcp') {
     return true;
   }
   return isSectionHeadingLine(text) || isJobHeadingLine(text);
@@ -123,6 +151,7 @@ const RESUME_SECTION_HEADINGS = new Set([
   'professional experience',
   'projects',
   'ai & cloud projects',
+  'ai engineering projects',
   'previous experience',
   'education',
 ]);
@@ -147,7 +176,7 @@ function getExpandedLineIndices(
       continue;
     }
 
-    if (isHotspotBoundaryLine(lines[index].text)) {
+    if (isHotspotBoundaryLine(lines[index].text, hotspot)) {
       break;
     }
 
